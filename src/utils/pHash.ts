@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system';
 import jpeg from 'jpeg-js';
 import { Buffer } from 'buffer';
 
-const SIZE = 32;
+const SIZE = 64;
 
 /**
  * Perform a 1D Discrete Cosine Transform (DCT-II) on an array.
@@ -66,11 +66,12 @@ function dct2D(matrix: Float64Array, size: number): Float64Array {
  * Compute the perceptual hash (pHash) of an image URI using DCT.
  */
 export async function computePHash(uri: string): Promise<string> {
-  // 1. Resize to 32x32 and convert to grayscale using Expo Native Module (Fast)
+  // 1. Resize to 64x64 and convert to grayscale using Expo Native Module
+  // Increased size for better detail accuracy before DCT
   const result = await ImageManipulator.manipulateAsync(
     uri,
     [{ resize: { width: SIZE, height: SIZE } }],
-    { format: ImageManipulator.SaveFormat.JPEG, base64: true } // Base64 is needed for buffer
+    { format: ImageManipulator.SaveFormat.JPEG, compress: 1.0, base64: true }
   );
 
   // Convert to grayscale isn't strictly an option in manip, but we can just use the Y channel (luminance) later.
@@ -99,8 +100,11 @@ export async function computePHash(uri: string): Promise<string> {
   // 4. Compute DCT
   const dctMatrix = dct2D(matrix, SIZE);
 
-  // 5. Reduce DCT: Keep top-left 8x8, excluding the first term (DC coefficient at 0,0)
-  const lowFreqSize = 8;
+  // 5. Reduce DCT: Keep top-left 16x16 (highest energy low freq), excluding DC at (0,0)
+  // Standard pHash uses 8x8 from 32x32 (1/4th).
+  // For 64x64, 16x16 is the equivalent frequency band (1/4th).
+  // hash length will be 256 - 1 = 255 bits.
+  const lowFreqSize = 16;
   const lowFreqList: number[] = [];
 
   for (let y = 0; y < lowFreqSize; y++) {
@@ -159,11 +163,11 @@ export async function compareImages(uri1: string, uri2: string): Promise<number>
   // "Compute the average value. Calculate the mean of these 64 values." (Some use median for robustness against gamma correction/histogram equalization).
   // "Further reduce the DCT. Set the 64 bits to 0 or 1 depending on whether each of the 64 DCT values is above or below the average value."
   // Often the very first term (DC) is excluded from the average calculation because it can be huge and skew the average, but the bit for it might still be generated?
-  // Let's stick to 63 bits if we exclude DC from the list entirely? Or simply include DC in the bit generation but exclude from average/median?
   // Including DC in hash implies we care about absolute brightness. pHash is usually robust to brightness changes.
   // So skipping DC for BOTH median calculation AND hash generation is safer for brightness invariance.
   // So we have 63 bits.
 
-  const hashLength = 63;
+  // Hash length is 16*16 - 1 = 255
+  const hashLength = 255;
   return Math.max(0, Math.min(100, (1 - distance / hashLength) * 100));
 }
