@@ -6,26 +6,26 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style="auto" />
-      <Tabs // Stack を Tabs に変更
+      <Tabs
         screenOptions={{
-          headerShown: false, // ヘッダーを非表示にする設定を継承
-          tabBarActiveTintColor: "#007AFF", // アクティブなタブの色を設定
+          headerShown: false,
+          tabBarActiveTintColor: "#007AFF",
         }}
       >
-        {/* 1. ホームタブ */}
+        {/* 1. ホームタブ: nameを (tabs)/home に修正 */}
         <Tabs.Screen
-          name="home" // app/home.js または app/(tabs)/home.js に対応
+          name="(tabs)/home"
           options={{
-            title: "ホーム", // タブに表示されるラベル
+            title: "ホーム",
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="home" color={color} size={size} />
             ),
           }}
         />
 
-        {/* 2. 投稿タブ */}
+        {/* 2. 投稿タブ: nameを (tabs)/post に修正 */}
         <Tabs.Screen
-          name="post" // app/post.js または app/(tabs)/post.js に対応
+          name="(tabs)/post"
           options={{
             title: "投稿",
             tabBarIcon: ({ color, size }) => (
@@ -35,14 +35,13 @@ export default function RootLayout() {
                 size={size}
               />
             ),
-            // 例: 投稿画面のみヘッダーを表示したい場合
             // headerShown: true,
           }}
         />
 
-        {/* 3. プロフィールタブ */}
+        {/* 3. プロフィールタブ: nameを (tabs)/profile に修正 */}
         <Tabs.Screen
-          name="profile" // app/profile.js または app/(tabs)/profile.js に対応
+          name="(tabs)/profile"
           options={{
             title: "プロフィール",
             tabBarIcon: ({ color, size }) => (
@@ -55,14 +54,8 @@ export default function RootLayout() {
           }}
         />
 
-        {/* ⚠️ 注意: 既存の Stack.Screen 定義は Tab Navigator の子として不適切なので削除します
-        <Tabs.Screen name="index" /> 
-        <Tabs.Screen name="detail" /> 
-        <Tabs.Screen name="map" />
-        <Tabs.Screen name="camera" />
-        <Tabs.Screen name="spot-result" />
-        <Tabs.Screen name="result" />
-        */}
+        {/* ⚠️ タブとして表示したくないルートは、Tabsコンポーネントの子として含めてはいけません。
+             また、ナビゲーションの構造に合わせて、その他の画面を管理する必要があります。 */}
       </Tabs>
     </>
   );
