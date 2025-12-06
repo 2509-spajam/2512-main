@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SpotResultView } from "../components/SpotResultView";
-import { mockRoutes } from "../data/mockData";
+import { fetchTravelById } from "../services/travelService";
 import { TravelRoute, CompletedSpot } from "../types";
 
 const COMPLETED_SPOTS_KEY = "completedSpots";
@@ -15,43 +16,61 @@ export default function SpotResult() {
     spotId: string;
   }>();
   const [route, setRoute] = useState<TravelRoute | null>(null);
+  const [loading, setLoading] = useState(true);
   const [completedSpot, setCompletedSpot] = useState<CompletedSpot | null>(
     null
   );
   const currentSpotIndex = spotIndex ? parseInt(spotIndex, 10) : 0;
 
   useEffect(() => {
-    const foundRoute = mockRoutes.find((r) => r.id === routeId);
-    if (!foundRoute) {
-      router.replace("/");
-      return;
-    }
-    setRoute(foundRoute);
+    const loadData = async () => {
+      if (!routeId) {
+        setLoading(false);
+        return;
+      }
 
-    const loadCompletedSpot = async () => {
       try {
-        const stored = await AsyncStorage.getItem(
-          `${COMPLETED_SPOTS_KEY}_${routeId}`
-        );
-        if (stored) {
-          const completedSpots: CompletedSpot[] = JSON.parse(stored);
-          const found = completedSpots.find((s) => s.spotId === spotId);
-          if (found) {
-            setCompletedSpot(found);
-          } else {
-            router.back();
+        // Load Route
+        const routeData = await fetchTravelById(routeId);
+        setRoute(routeData);
+
+        if (routeData) {
+          // Load Completed Spot only if route exists
+          const stored = await AsyncStorage.getItem(
+            `${COMPLETED_SPOTS_KEY}_${routeId}`
+          );
+          if (stored) {
+            const completedSpots: CompletedSpot[] = JSON.parse(stored);
+            const found = completedSpots.find((s) => s.spotId === spotId);
+            if (found) {
+              setCompletedSpot(found);
+            }
           }
-        } else {
-          router.back();
         }
       } catch (error) {
-        console.error("Error loading completed spot:", error);
-        router.back();
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadCompletedSpot();
-  }, [routeId, spotId, router]);
+    loadData();
+  }, [routeId, spotId]);
+
+  useEffect(() => {
+    if (!loading && (!route || !completedSpot)) {
+      // Only redirect/back if finished loading and data is missing
+      router.back();
+    }
+  }, [loading, route, completedSpot, router]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   if (!route || !completedSpot) {
     return null;
