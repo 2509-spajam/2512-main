@@ -23,7 +23,12 @@ interface ResultViewProps {
 
 const { width } = Dimensions.get("window");
 
-export function ResultView({ route, completedSpots, onBack, onShowOriginal }: ResultViewProps) {
+export function ResultView({
+  route,
+  completedSpots,
+  onBack,
+  onShowOriginal,
+}: ResultViewProps) {
   const averageSyncRate =
     completedSpots.reduce((sum, spot) => sum + spot.syncRate, 0) /
     completedSpots.length;
