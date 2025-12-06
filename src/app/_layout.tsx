@@ -12,6 +12,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="timeline" />
         <Stack.Screen name="detail" />
         <Stack.Screen name="map" />
         <Stack.Screen name="camera" />
