@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { FONTS } from "../constants/fonts";
+import { COLORS } from "../constants/colors";
 
 interface LoadingViewProps {
   progress?: number;
@@ -62,14 +63,10 @@ export const LoadingView: React.FC<LoadingViewProps> = ({
   return (
     <View style={styles.loadingContainer}>
       <View style={styles.progressBarContainer}>
-        <View
-          style={[styles.progressBar, { width: `${loadingProgress}%` }]}
-        />
+        <View style={[styles.progressBar, { width: `${loadingProgress}%` }]} />
       </View>
       {showProgress && (
-        <Text style={styles.progressText}>
-          {loadingProgress.toFixed(0)}%
-        </Text>
+        <Text style={styles.progressText}>{loadingProgress.toFixed(0)}%</Text>
       )}
     </View>
   );
@@ -82,6 +79,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     padding: 20,
+    backgroundColor: COLORS.BACKGROUND,
   },
   progressBarContainer: {
     width: "100%",

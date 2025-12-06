@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,13 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
-} from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Feather } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { TravelRoute, CompletedSpot } from '../types';
-import { COLORS } from '../constants/colors';
-import { FONTS } from '../constants/fonts';
+} from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { TravelRoute, CompletedSpot } from "../types";
+import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts";
 
 interface MapViewProps {
   route: TravelRoute;
@@ -22,7 +22,7 @@ interface MapViewProps {
   onShowResult: () => void;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 export function MapViewComponent({
   route,
@@ -75,11 +75,11 @@ export function MapViewComponent({
 
   // ネオンカラー判定（ボーダーや背景用）
   const getSyncRateColor = (rate: number): string => {
-    if (rate >= 95) return '#03FFD1'; // Neon Cyan
-    if (rate >= 85) return '#2563EB'; // Blue
-    if (rate >= 75) return '#F59E0B'; // Amber
-    if (rate >= 60) return '#D97706'; // Dark Orange
-    return '#4B5563'; // Gray
+    if (rate >= 95) return "#03FFD1"; // Neon Cyan
+    if (rate >= 85) return "#2563EB"; // Blue
+    if (rate >= 75) return "#F59E0B"; // Amber
+    if (rate >= 60) return "#D97706"; // Dark Orange
+    return "#4B5563"; // Gray
   };
 
   return (
@@ -197,9 +197,9 @@ export function MapViewComponent({
                   <View
                     style={[
                       styles.syncRateBadge,
-                      { 
+                      {
                         borderColor: getSyncRateColor(completed.syncRate),
-                        backgroundColor: '#192130',
+                        backgroundColor: "#192130",
                       },
                     ]}
                   >
@@ -224,7 +224,7 @@ export function MapViewComponent({
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#03FFD1', '#03FFD1']}
+              colors={["#03FFD1", "#03FFD1"]}
               style={styles.resultButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -244,12 +244,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.BACKGROUND,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#313745',
+    borderBottomColor: "#313745",
     backgroundColor: COLORS.BACKGROUND,
     paddingTop: 44,
   },
@@ -259,9 +259,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 18,
-    color: '#03FFD1',
-    textAlign: 'center',
-    marginRight: 40,
+    color: "#03FFD1",
+    textAlign: "center",
     fontFamily: FONTS.ORBITRON_BOLD,
     textShadowColor: "rgba(3, 255, 209, 0.5)",
     textShadowOffset: { width: 0, height: 0 },
@@ -275,8 +274,8 @@ const styles = StyleSheet.create({
   },
   // --- マーカー関連 ---
   markerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     width: 80,
     height: 100,
     paddingBottom: 25,
@@ -288,20 +287,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#03FFD1',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#03FFD1",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#03FFD1',
+    borderColor: "#03FFD1",
     zIndex: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
   },
   markerNumber: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontFamily: FONTS.ORBITRON_BOLD,
   },
   syncRateBadge: {
@@ -310,11 +309,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 8,
     minWidth: 45,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    backgroundColor: '#192130',
+    backgroundColor: "#192130",
     zIndex: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
@@ -323,20 +322,20 @@ const styles = StyleSheet.create({
   syncRateText: {
     fontSize: 11,
     fontFamily: FONTS.ORBITRON_BOLD,
-    color: '#03FFD1', 
+    color: "#03FFD1",
   },
   // --- Legend (リスト) ---
   legend: {
-    backgroundColor: '#192130',
+    backgroundColor: "#192130",
     borderBottomWidth: 1,
-    borderBottomColor: '#313745',
+    borderBottomColor: "#313745",
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
   },
   legendTitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 8,
     fontFamily: FONTS.ORBITRON_BOLD,
     letterSpacing: 1,
@@ -346,55 +345,55 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#313745',
+    backgroundColor: "#313745",
     borderRadius: 8,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#313745',
+    borderColor: "#313745",
   },
   legendMarker: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#03FFD1',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#03FFD1",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   legendMarkerNumber: {
     fontSize: 14,
-    color: '#000000',
+    color: "#000000",
     fontFamily: FONTS.ORBITRON_BOLD,
   },
   legendText: {
     flex: 1,
     fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '500',
+    color: "#FFFFFF",
+    fontWeight: "500",
   },
   legendSyncRate: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
     minWidth: 45,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
   legendSyncRateText: {
     fontSize: 12,
     fontFamily: FONTS.ORBITRON_BOLD,
-    color: '#03FFD1',
+    color: "#03FFD1",
   },
   // --- Result Button ---
   resultButtonContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     left: 16,
     right: 16,
@@ -402,24 +401,24 @@ const styles = StyleSheet.create({
   },
   resultButton: {
     borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#03FFD1',
+    overflow: "hidden",
+    shadowColor: "#03FFD1",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 10,
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
   },
   resultButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     paddingVertical: 16,
   },
   resultButtonText: {
     fontSize: 16,
-    color: '#000000',
+    color: "#000000",
     fontFamily: FONTS.ORBITRON_BOLD,
     letterSpacing: 1,
   },
