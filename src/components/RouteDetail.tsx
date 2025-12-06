@@ -11,6 +11,8 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { TravelRoute } from "../types";
 import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts";
 
 interface RouteDetailProps {
   route: TravelRoute;
@@ -42,7 +44,7 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color="#1F2937" />
+          <Feather name="arrow-left" size={24} color="#03FFD1" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>ルート詳細</Text>
         <View style={styles.headerSpacer} />
@@ -85,7 +87,7 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
           {totalImages > 0 && (
             <View style={styles.pagerContainer}>
               <Text style={styles.pagerText}>
-                {activeIndex + 1}/{totalImages}
+                {activeIndex + 1} / {totalImages}
               </Text>
             </View>
           )}
@@ -96,21 +98,21 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
 
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <Feather name="map" size={20} color="#2563EB" />
+              <Feather name="map" size={20} color="#03FFD1" />
               <View style={styles.statContent}>
                 <Text style={styles.statLabel}>距離</Text>
                 <Text style={styles.statValue}>{route.totalDistance}</Text>
               </View>
             </View>
             <View style={styles.statItem}>
-              <Feather name="clock" size={20} color="#2563EB" />
+              <Feather name="clock" size={20} color="#03FFD1" />
               <View style={styles.statContent}>
                 <Text style={styles.statLabel}>所要時間</Text>
                 <Text style={styles.statValue}>{route.duration}</Text>
               </View>
             </View>
             <View style={styles.statItem}>
-              <Feather name="map-pin" size={20} color="#2563EB" />
+              <Feather name="map-pin" size={20} color="#03FFD1" />
               <View style={styles.statContent}>
                 <Text style={styles.statLabel}>スポット数</Text>
                 <Text style={styles.statValue}>{route.spots.length} 箇所</Text>
@@ -152,7 +154,7 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={["#2563EB", "#3B82F6"]}
+            colors={["#03FFD1", "#03FFD1"]}
             style={styles.startButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -168,16 +170,14 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   backButton: {
     padding: 8,
@@ -186,9 +186,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
     textAlign: "center",
-    marginRight: 40,
   },
   headerSpacer: {
     width: 40,
@@ -256,16 +258,14 @@ const styles = StyleSheet.create({
   pagerText: {
     color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   infoSection: {
     padding: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
   },
   description: {
     fontSize: 15,
-    color: "#374151",
+    color: "#6B7280",
     lineHeight: 22,
     marginBottom: 24,
   },
@@ -297,8 +297,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 24,
     paddingTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
   },
   metaStatItem: {
     flexDirection: "row",
@@ -315,13 +313,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#6B7280",
     marginBottom: 16,
   },
   spotCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#192130",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -330,7 +328,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#2563EB",
+    backgroundColor: "#03FFD1",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -338,7 +336,7 @@ const styles = StyleSheet.create({
   spotNumberText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#000",
   },
   spotInfo: {
     flex: 1,
@@ -347,7 +345,7 @@ const styles = StyleSheet.create({
   spotName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#6B7280",
     marginBottom: 6,
   },
   spotLocation: {
@@ -366,9 +364,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   startButton: {
     borderRadius: 12,
@@ -387,6 +383,6 @@ const styles = StyleSheet.create({
   startButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#000",
   },
 });

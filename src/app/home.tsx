@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Timeline } from "../components/Timeline";
 import { mockRoutes } from "../data/mockData";
 import { TravelRoute } from "../types";
+import { COLORS } from "../constants/colors";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -25,6 +26,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
   },
 });

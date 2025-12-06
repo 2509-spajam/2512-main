@@ -1,5 +1,4 @@
-// ...existing code...
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -7,40 +6,24 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { TravelRoute } from '../types';
+} from "react-native";
+import { TravelRoute } from "../types";
+import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts";
 
 interface TimelineProps {
   routes: TravelRoute[];
   onRouteSelect: (route: TravelRoute) => void;
 }
 
-const { width } = Dimensions.get('window');
-// const cardWidth = (width - 48) / 2; // 2列用の計算 → 削除/未使用に変更
-
 export function Timeline({ routes, onRouteSelect }: TimelineProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>未定</Text>
-        <Text style={styles.subtitle}>未定</Text>
+        <Text style={styles.title}>Photo Quest</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.tabs}>
-          <View style={[styles.tab, styles.tabActive]}>
-            <Text style={styles.tabTextActive}>人気</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>新着</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>ランキング</Text>
-          </View>
-        </View>
-
         <View style={styles.grid}>
           {routes.map((route) => (
             <TouchableOpacity
@@ -57,8 +40,12 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
                 />
                 <View style={styles.spotBadge}>
                   <Text style={styles.spotBadgeText}>
-                    {route.spots.length} スポット
+                    {route.spots.length} check points
                   </Text>
+                </View>
+                <View style={styles.syncroRate}>
+                  <Text style={styles.syncroRateText}>Syncro Rate</Text>
+                  <Text style={styles.syncroRateTextValue}>75 %</Text>
                 </View>
               </View>
 
@@ -95,114 +82,106 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F9FF',
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
-    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: "#313745",
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2563EB',
+    fontWeight: "bold",
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginTop: 4,
   },
   content: {
     flex: 1,
   },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  tab: {
-    paddingBottom: 12,
-    paddingHorizontal: 8,
-    marginRight: 16,
-  },
-  tabActive: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#2563EB',
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  tabTextActive: {
-    fontSize: 14,
-    color: '#2563EB',
-    fontWeight: '600',
-  },
   grid: {
     // 2列から1列に変更
-    flexDirection: 'column',
+    flexDirection: "column",
     padding: 16,
     // gap は環境によって非対応のため使用しない
   },
   card: {
     // 1列表示に合わせて幅を100%に、下マージンで間隔をつくる
-    width: '100%',
+    width: "100%",
     marginBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#192130",
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#313745",
   },
   imageContainer: {
-    width: '100%',
+    width: "100%",
     height: 180,
-    position: 'relative',
+    position: "relative",
   },
   coverImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   spotBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 12,
     right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
   },
   spotBadgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: 14,
+    fontFamily: FONTS.ORBITRON_BOLD,
+    color: "#ffffff",
+  },
+  syncroRate: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  syncroRateText: {
+    fontSize: 14,
+    color: "#ffffff",
+    fontFamily: FONTS.ORBITRON_BOLD,
+  },
+  syncroRateTextValue: {
+    textAlign: "center",
+    fontSize: 24,
+    fontFamily: FONTS.ORBITRON_BOLD,
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   cardContent: {
     padding: 16,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
   cardDescription: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 12,
     lineHeight: 18,
   },
   authorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   authorAvatar: {
@@ -213,29 +192,28 @@ const styles = StyleSheet.create({
   },
   authorName: {
     fontSize: 13,
-    color: '#374151',
+    color: "#6B7280",
   },
   statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#313745",
   },
   stats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // gap を使わない場合は適宜 margin を使って調整可能
+    flexDirection: "row",
+    alignItems: "center",
     marginRight: 8,
   },
   statText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginLeft: 4,
   },
   distanceText: {
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
   },
 });

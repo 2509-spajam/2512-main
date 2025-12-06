@@ -11,6 +11,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TravelRoute, CompletedSpot } from '../types';
+import { COLORS } from '../constants/colors';
 
 interface MapViewProps {
   route: TravelRoute;
@@ -92,11 +93,11 @@ export function MapViewComponent({
       <View style={styles.legend}>
         <Text style={styles.legendTitle}>撮影スポット</Text>
         <ScrollView
-          style={[styles.legendScrollView, scrollViewStyle]} 
+          style={[styles.legendScrollView, scrollViewStyle]}
           contentContainerStyle={styles.legendItems}
           showsVerticalScrollIndicator={shouldScroll}
           nestedScrollEnabled={true}
-          bounces={shouldScroll} 
+          bounces={shouldScroll}
         >
           {route.spots.map((spot, index) => {
             const completed = getCompletedSpot(spot.id);
@@ -223,7 +224,7 @@ export function MapViewComponent({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
@@ -299,7 +300,7 @@ const styles = StyleSheet.create({
   },
   legend: {
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1, 
+    borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
     paddingHorizontal: 16,
     paddingTop: 16,

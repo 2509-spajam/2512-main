@@ -11,6 +11,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { TravelRoute, CompletedSpot } from "../types";
 import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "../constants/colors";
 
 interface ResultViewProps {
   route: TravelRoute;
@@ -211,7 +212,7 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F9FF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: "row",

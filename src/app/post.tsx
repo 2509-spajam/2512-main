@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { COLORS } from "../constants/colors";
 
 const { width } = Dimensions.get("window");
 const IMAGE_SIZE = (width - 48) / 3;
@@ -177,7 +178,7 @@ export default function PostScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: "row",

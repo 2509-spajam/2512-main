@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth } from "../components/AuthContext";
+import { COLORS } from "../constants/colors";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -30,7 +31,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: 'row',
