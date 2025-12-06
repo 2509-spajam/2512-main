@@ -12,6 +12,7 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TravelRoute, CompletedSpot } from '../types';
 import { COLORS } from '../constants/colors';
+import { FONTS } from '../constants/fonts';
 
 interface MapViewProps {
   route: TravelRoute;
@@ -72,24 +73,27 @@ export function MapViewComponent({
     return completedSpots.find((spot) => spot.spotId === spotId);
   };
 
+  // ネオンカラー判定（ボーダーや背景用）
   const getSyncRateColor = (rate: number): string => {
-    if (rate >= 95) return '#FBBF24';
-    if (rate >= 85) return '#3B82F6';
-    if (rate >= 75) return '#10B981';
-    if (rate >= 60) return '#F97316';
-    return '#6B7280';
+    if (rate >= 95) return '#03FFD1'; // Neon Cyan
+    if (rate >= 85) return '#2563EB'; // Blue
+    if (rate >= 75) return '#F59E0B'; // Amber
+    if (rate >= 60) return '#D97706'; // Dark Orange
+    return '#4B5563'; // Gray
   };
 
   return (
     <View style={styles.container}>
+      {/* ヘッダー */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color="#1F2937" />
+          <Feather name="arrow-left" size={24} color="#03FFD1" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{route.title}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
+      {/* スポット一覧 (Legend) */}
       <View style={styles.legend}>
         <Text style={styles.legendTitle}>撮影スポット</Text>
         <ScrollView
@@ -115,6 +119,7 @@ export function MapViewComponent({
                     styles.legendMarker,
                     completed && {
                       backgroundColor: getSyncRateColor(completed.syncRate),
+                      borderColor: getSyncRateColor(completed.syncRate),
                     },
                   ]}
                 >
@@ -127,9 +132,10 @@ export function MapViewComponent({
                   <View
                     style={[
                       styles.legendSyncRate,
-                      { backgroundColor: getSyncRateColor(completed.syncRate) },
+                      { borderColor: getSyncRateColor(completed.syncRate) },
                     ]}
                   >
+                    {/* ★修正: style配列をやめ、styles.legendSyncRateTextのみにしました */}
                     <Text style={styles.legendSyncRateText}>
                       {completed.syncRate}%
                     </Text>
@@ -141,6 +147,7 @@ export function MapViewComponent({
         </ScrollView>
       </View>
 
+      {/* マップ */}
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.map}
@@ -151,6 +158,7 @@ export function MapViewComponent({
         {route.spots.map((spot, index) => {
           const completed = getCompletedSpot(spot.id);
           const isSelected = selectedSpotId === spot.id;
+          const zIndex = isSelected ? 100 : completed ? 10 : 1;
 
           return (
             <Marker
@@ -159,6 +167,10 @@ export function MapViewComponent({
                 latitude: spot.lat,
                 longitude: spot.lng,
               }}
+              zIndex={zIndex}
+              opacity={0.99}
+              anchor={{ x: 0.5, y: 1 }}
+              tracksViewChanges={isSelected}
               onPress={() => {
                 setSelectedSpotId(spot.id);
                 onSpotSelect(spot.id, index);
@@ -175,6 +187,7 @@ export function MapViewComponent({
                     styles.markerPin,
                     completed && {
                       backgroundColor: getSyncRateColor(completed.syncRate),
+                      borderColor: getSyncRateColor(completed.syncRate),
                     },
                   ]}
                 >
@@ -184,9 +197,13 @@ export function MapViewComponent({
                   <View
                     style={[
                       styles.syncRateBadge,
-                      { backgroundColor: getSyncRateColor(completed.syncRate) },
+                      { 
+                        borderColor: getSyncRateColor(completed.syncRate),
+                        backgroundColor: '#192130',
+                      },
                     ]}
                   >
+                    {/* ★修正: style配列をやめ、styles.syncRateTextのみにしました */}
                     <Text style={styles.syncRateText}>
                       {completed.syncRate}%
                     </Text>
@@ -198,6 +215,7 @@ export function MapViewComponent({
         })}
       </MapView>
 
+      {/* リザルトボタン */}
       {isAllCompleted && (
         <View style={styles.resultButtonContainer}>
           <TouchableOpacity
@@ -206,12 +224,11 @@ export function MapViewComponent({
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#2563EB', '#3B82F6']}
+              colors={['#03FFD1', '#03FFD1']}
               style={styles.resultButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Feather name="award" size={20} color="#FFFFFF" />
               <Text style={styles.resultButtonText}>リザルトを見る</Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -232,8 +249,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: '#313745',
+    backgroundColor: COLORS.BACKGROUND,
     paddingTop: 44,
   },
   backButton: {
@@ -242,10 +259,13 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
+    color: '#03FFD1',
     textAlign: 'center',
     marginRight: 40,
+    fontFamily: FONTS.ORBITRON_BOLD,
+    textShadowColor: "rgba(3, 255, 209, 0.5)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   headerSpacer: {
     width: 40,
@@ -253,113 +273,129 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  // --- マーカー関連 ---
   markerContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: 80,
+    height: 100,
+    paddingBottom: 25,
   },
   markerContainerSelected: {
-    transform: [{ scale: 1.2 }],
+    transform: [{ scale: 1.3 }],
   },
   markerPin: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#2563EB',
+    backgroundColor: '#192130',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#03FFD1',
+    zIndex: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.5,
     shadowRadius: 4,
-    elevation: 5,
   },
   markerNumber: {
     fontSize: 16,
-    fontWeight: 'bold',
     color: '#FFFFFF',
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   syncRateBadge: {
     marginTop: 4,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
-    minWidth: 50,
+    borderRadius: 8,
+    minWidth: 45,
     alignItems: 'center',
+    borderWidth: 1,
+    backgroundColor: '#192130',
+    zIndex: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
     shadowRadius: 2,
-    elevation: 3,
   },
+  // ★修正: ここで色を指定
   syncRateText: {
     fontSize: 11,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontFamily: FONTS.ORBITRON_BOLD,
+    color: '#03FFD1', 
   },
+  // --- Legend (リスト) ---
   legend: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#192130',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#313745',
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
   },
   legendTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontSize: 14,
+    color: '#6B7280',
     marginBottom: 8,
+    fontFamily: FONTS.ORBITRON_BOLD,
+    letterSpacing: 1,
   },
-  legendScrollView: {
-  },
+  legendScrollView: {},
   legendItems: {
     paddingBottom: 8,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#192130',
     borderRadius: 8,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#313745',
   },
   legendMarker: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#2563EB',
+    backgroundColor: '#313745',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   legendMarkerNumber: {
     fontSize: 14,
-    fontWeight: 'bold',
     color: '#FFFFFF',
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   legendText: {
     flex: 1,
     fontSize: 14,
-    color: '#374151',
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
   legendSyncRate: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 2,
+    borderRadius: 4,
     minWidth: 45,
     alignItems: 'center',
+    borderWidth: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   legendSyncRateText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontSize: 12,
+    fontFamily: FONTS.ORBITRON_BOLD,
+    color: '#03FFD1',
   },
+  // --- Result Button ---
   resultButtonContainer: {
     position: 'absolute',
-    bottom: 16,
+    bottom: 30,
     left: 16,
     right: 16,
     zIndex: 1000,
@@ -367,11 +403,12 @@ const styles = StyleSheet.create({
   resultButton: {
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#2563EB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: '#03FFD1',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
   resultButtonGradient: {
     flexDirection: 'row',
@@ -382,7 +419,8 @@ const styles = StyleSheet.create({
   },
   resultButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#000000',
+    fontFamily: FONTS.ORBITRON_BOLD,
+    letterSpacing: 1,
   },
 });

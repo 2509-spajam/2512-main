@@ -68,11 +68,11 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={24} color="#1F2937" />
+          <Feather name="arrow-left" size={24} color="#03FFD1" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>リザルト</Text>
         <TouchableOpacity style={styles.shareButton}>
-          <Feather name="share-2" size={24} color="#1F2937" />
+          <Feather name="share-2" size={24} color="#03FFD1" />
         </TouchableOpacity>
       </View>
 
@@ -188,7 +188,7 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
         <View style={styles.actions}>
           <TouchableOpacity style={styles.shareButtonLarge} activeOpacity={0.8}>
             <LinearGradient
-              colors={["#2563EB", "#3B82F6"]}
+              colors={["#03FFD1", "#03FFD1"]}
               style={styles.shareButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#192130",
   },
   backButton: {
     padding: 8,
@@ -230,16 +230,17 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#03FFD1",
   },
   shareButton: {
     padding: 8,
+    color: "#000000",
   },
   content: {
     flex: 1,
   },
   scoreCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#374151",
     borderRadius: 24,
     padding: 32,
     margin: 16,
@@ -291,7 +292,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 18,
-    color: "#374151",
+    color: "#FFFFFF",
     marginTop: 16,
   },
   badgesContainer: {
@@ -321,12 +322,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#6B7280",
     marginBottom: 16,
     paddingHorizontal: 8,
   },
   spotResultCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#374151",
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 16,
@@ -346,7 +347,7 @@ const styles = StyleSheet.create({
   },
   imageLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
   spotImage: {
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   spotResultName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 4,
   },
   spotResultTime: {
@@ -378,7 +379,7 @@ const styles = StyleSheet.create({
   spotResultRate: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#03FFD1",
     fontVariant: ["tabular-nums"],
     marginBottom: 4,
   },
@@ -403,6 +404,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
+    color: "#000000",
   },
   shareButtonText: {
     fontSize: 16,
