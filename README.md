@@ -20,6 +20,9 @@ npm install
 
 ```bash
 npm start
+
+# または（起動できない場合）
+npm run start:tunnel
 ```
 
 プラットフォーム別の実行:
