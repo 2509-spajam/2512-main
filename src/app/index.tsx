@@ -94,7 +94,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Photo Quest</Text>
+        <Text style={styles.title}>Re:Write</Text>
       </View>
 
       <View style={styles.tabContainer}>
