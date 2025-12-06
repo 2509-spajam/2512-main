@@ -335,8 +335,9 @@ const styles = StyleSheet.create({
   },
   spotNumberText: {
     fontSize: 18,
-    fontWeight: "600",
+    // fontWeight: "600", // フォント自体が太字なので削除
     color: "#000",
+    fontFamily: FONTS.ORBITRON_BOLD, // ここを追加
   },
   spotInfo: {
     flex: 1,
@@ -345,7 +346,7 @@ const styles = StyleSheet.create({
   spotName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#FFFFFF",
     marginBottom: 6,
   },
   spotLocation: {

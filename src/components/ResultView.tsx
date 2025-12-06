@@ -12,6 +12,7 @@ import { Feather } from "@expo/vector-icons";
 import { TravelRoute, CompletedSpot } from "../types";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts"; // FONTSをインポート
 
 interface ResultViewProps {
   route: TravelRoute;
@@ -229,8 +230,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "600",
     color: "#03FFD1",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   shareButton: {
     padding: 8,
@@ -240,7 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scoreCard: {
-    backgroundColor: "#374151",
+    backgroundColor: "#6B7280",
     borderRadius: 24,
     padding: 32,
     margin: 16,
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
   },
   routeTitle: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#1F2937",
     marginBottom: 24,
   },
   scoreContainer: {
@@ -277,18 +278,20 @@ const styles = StyleSheet.create({
   },
   scoreValue: {
     fontSize: 64,
-    fontWeight: "bold",
-    color: "#1F2937",
+    color: "#03FFD1",
     fontVariant: ["tabular-nums"],
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   scoreUnit: {
     fontSize: 32,
-    color: "#6B7280",
+    color: "#03FFD1",
+    fontFamily: FONTS.ORBITRON_BOLD,
+    marginLeft: 4,
   },
   rankText: {
     fontSize: 48,
-    fontWeight: "bold",
     marginTop: 8,
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   messageText: {
     fontSize: 18,
@@ -372,20 +375,21 @@ const styles = StyleSheet.create({
   spotResultTime: {
     fontSize: 13,
     color: "#6B7280",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   spotResultScore: {
     alignItems: "flex-end",
   },
   spotResultRate: {
     fontSize: 24,
-    fontWeight: "bold",
     color: "#03FFD1",
     fontVariant: ["tabular-nums"],
     marginBottom: 4,
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   spotResultRank: {
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   actions: {
     padding: 16,
@@ -408,8 +412,8 @@ const styles = StyleSheet.create({
   },
   shareButtonText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#000000",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   backButtonLarge: {
     backgroundColor: "#FFFFFF",
@@ -422,7 +426,7 @@ const styles = StyleSheet.create({
   },
   backButtonText: {
     fontSize: 16,
-    fontWeight: "600",
     color: "#374151",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
 });
