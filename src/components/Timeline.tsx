@@ -24,6 +24,7 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+
         <View style={styles.grid}>
           {routes.map((route) => (
             <TouchableOpacity

@@ -75,19 +75,14 @@ function RootLayoutNav() {
         <Tabs.Screen
           name="index"
           options={{
-            href: null,
-            tabBarStyle: { display: "none" },
-          }}
-        />
-        <Tabs.Screen
-          name="home"
-          options={{
             title: "ホーム",
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="home" color={color} size={size} />
             ),
           }}
         />
+        {/* 'home' removed as it duplicates index functionality */}
+
         <Tabs.Screen
           name="post"
           options={{
@@ -115,6 +110,13 @@ function RootLayoutNav() {
           }}
         />
         {/* Hidden Tabs (Screens) */}
+        <Tabs.Screen
+          name="welcome"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
         <Tabs.Screen
           name="login"
           options={{
@@ -172,7 +174,7 @@ function RootLayoutNav() {
           }}
         />
       </Tabs>
-    </ScreenWrapper>
+    </ScreenWrapper >
   );
 }
 

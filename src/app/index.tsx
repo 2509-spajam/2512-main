@@ -1,35 +1,71 @@
-import React, { useEffect } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
+import { useRouter, Redirect } from "expo-router";
+import { Timeline } from "../components/Timeline";
+import { fetchTravels } from "../services/travelService";
+import { TravelRoute } from "../types";
 import { sessionState } from "../lib/session";
 import { COLORS } from "../constants/colors";
 
-export default function Index() {
+export default function HomeScreen() {
   const router = useRouter();
 
-  useEffect(() => {
-    if (sessionState.hasSeenKV) {
-      router.replace("/home");
-    }
-  }, []);
+  if (!sessionState.hasSeenKV) {
+    return <Redirect href="/welcome" />;
+  }
 
-  const handleStart = () => {
-    sessionState.hasSeenKV = true;
-    router.replace("/home");
+  const [routes, setRoutes] = React.useState<TravelRoute[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState<'original' | 'sync'>('original');
+
+  React.useEffect(() => {
+    loadTravels();
+  }, [activeTab]);
+
+  const loadTravels = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchTravels(activeTab);
+      setRoutes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRouteSelect = (route: TravelRoute) => {
+    router.push({
+      pathname: "/detail",
+      params: { routeId: route.id },
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ようこそ</Text>
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-        ]}
-        onPress={handleStart}
-      >
-        <Text style={styles.buttonText}>タイムラインを見る</Text>
-      </Pressable>
+      <View style={styles.tabContainer}>
+        <Text
+          style={[styles.tab, activeTab === 'original' && styles.activeTab]}
+          onPress={() => setActiveTab('original')}
+        >
+          みんなの投稿
+        </Text>
+        <Text
+          style={[styles.tab, activeTab === 'sync' && styles.activeTab]}
+          onPress={() => setActiveTab('sync')}
+        >
+          みんなのシンクロ
+        </Text>
+      </View>
+      {loading ? (
+        <ActivityIndicator
+          size="large"
+          color="#007AFF"
+          style={{ marginTop: 20 }}
+        />
+      ) : (
+        <Timeline routes={routes} onRouteSelect={handleRouteSelect} />
+      )}
     </View>
   );
 }
@@ -42,22 +78,24 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: COLORS.BACKGROUND,
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
+  tabContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  button: {
-    backgroundColor: "#2f6df6",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonText: {
-    color: "#fff",
+  tab: {
+    flex: 1,
+    textAlign: 'center',
+    paddingVertical: 10,
     fontSize: 16,
-    fontWeight: "bold",
+    color: '#666',
+    fontWeight: '600',
+  },
+  activeTab: {
+    color: '#007AFF',
+    borderBottomWidth: 2,
+    borderBottomColor: '#007AFF',
   },
 });

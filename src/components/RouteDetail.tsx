@@ -18,17 +18,18 @@ interface RouteDetailProps {
   route: TravelRoute;
   onBack: () => void;
   onStartSync: () => void;
+  onShowOriginal?: () => void;
 }
 
 const { width } = Dimensions.get("window");
 
-export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
+export function RouteDetail({ route, onBack, onStartSync, onShowOriginal }: RouteDetailProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const images = [
+  const images = Array.from(new Set([
     route.coverImage,
     ...route.spots.map((spot) => spot.imageUrl),
-  ].filter(Boolean);
+  ])).filter(Boolean);
 
   const totalImages = images.length;
 
@@ -148,6 +149,17 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
       </ScrollView>
 
       <View style={styles.footer}>
+        {route.originTravelId && (
+          <TouchableOpacity
+            style={[styles.startButton, { marginBottom: 12, backgroundColor: '#fff', borderWidth: 1, borderColor: '#2563EB' }]}
+            onPress={onShowOriginal}
+            activeOpacity={0.8}
+          >
+            <View style={styles.startButtonGradient}>
+              <Text style={[styles.startButtonText, { color: '#2563EB' }]}>元旅行を見る</Text>
+            </View>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={styles.startButton}
           onPress={onStartSync}
