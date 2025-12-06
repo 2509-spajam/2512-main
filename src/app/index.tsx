@@ -1,32 +1,51 @@
-import React, { useEffect } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 import { useRouter, Redirect } from "expo-router";
+import { Timeline } from "../components/Timeline";
+import { fetchTravels } from "../services/travelService";
+import { TravelRoute } from "../types";
 import { sessionState } from "../lib/session";
 
-export default function Index() {
+export default function HomeScreen() {
   const router = useRouter();
 
-  if (sessionState.hasSeenKV) {
-    return <Redirect href="/home" />;
+  if (!sessionState.hasSeenKV) {
+    return <Redirect href="/welcome" />;
   }
 
-  const handleStart = () => {
-    sessionState.hasSeenKV = true;
-    router.replace("/home");
+  const [routes, setRoutes] = React.useState<TravelRoute[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    loadTravels();
+  }, []);
+
+  const loadTravels = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchTravels();
+      setRoutes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRouteSelect = (route: TravelRoute) => {
+    router.push({
+      pathname: "/detail",
+      params: { routeId: route.id },
+    });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ようこそ</Text>
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-        ]}
-        onPress={handleStart}
-      >
-        <Text style={styles.buttonText}>タイムラインを見る</Text>
-      </Pressable>
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 20 }} />
+      ) : (
+        <Timeline routes={routes} onRouteSelect={handleRouteSelect} />
+      )}
     </View>
   );
 }
@@ -34,27 +53,6 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
     backgroundColor: "#fff",
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#2f6df6",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
