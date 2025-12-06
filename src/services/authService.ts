@@ -1,3 +1,6 @@
+import { supabase } from '../lib/supabase';
+import * as Crypto from 'expo-crypto';
+
 // Mock Service for Authentication
 
 export const validateId = (id: string): string | null => {
@@ -26,39 +29,86 @@ export const validatePassword = (password: string): string | null => {
   return null;
 };
 
-// Mock DB latency
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const hashPassword = async (password: string) => {
+  const digest = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    password
+  );
+  return digest;
+};
 
 export const authService = {
-  login: async (id: string, pass_hash: string) => {
-    await delay(1000);
-    // In a real app, verify hash here.
-    // For mock, just checking valid ID format is enough to "login" if we assume user exists.
-    // But let's simulates simple success.
+  login: async (id: string, password: string) => {
+    // 1. Hash password
+    const pass_hash = await hashPassword(password);
 
-    // Simulate error for specific test case if needed, or just success.
-    if (!id || !pass_hash) throw new Error("IDまたはパスワードが間違っています");
+    // 2. Query Supabase
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .limit(1);
 
-    return {
-      id: id,
-      name: "テストユーザー", // Mock name
-      token: "mock-jwt-token-123",
-      created_at: new Date().toISOString()
-    };
-  },
+    if (error) {
+      console.error("Login error:", error);
+      throw new Error("ログインに失敗しました");
+    }
 
-  signup: async (id: string, name: string, pass_hash: string) => {
-    await delay(1500);
-    // Validate again just in case
-    if (validateId(id) || validateName(name) || validatePassword(pass_hash)) {
-      throw new Error("入力内容に誤りがあります");
+    if (!data || data.length === 0) {
+      throw new Error("IDまたはパスワードが間違っています");
+    }
+
+    const user = data[0];
+
+    // 3. Compare hash
+    // Note: In a real secure system, we should verify using a timing-safe comparison,
+    // but here we are doing a simple string comparison as requested.
+    if (user.pass_hash !== pass_hash) {
+      throw new Error("IDまたはパスワードが間違っています");
     }
 
     return {
-      id: id,
-      name: name,
-      token: "mock-jwt-token-456",
-      created_at: new Date().toISOString()
+      id: user.id,
+      name: user.name,
+      created_at: user.created_at
+    };
+  },
+
+  signup: async (id: string, name: string, password: string) => {
+    // Validate again just in case
+    if (validateId(id) || validateName(name) || validatePassword(password)) {
+      throw new Error("入力内容に誤りがあります");
+    }
+
+    // Hash
+    const pass_hash = await hashPassword(password);
+
+    // Insert logic
+    const { data, error } = await supabase
+      .from('users')
+      .insert([
+        { id, name, pass_hash }
+      ])
+      .select(); // Remove .single()
+
+    if (error) {
+      console.error("Signup error:", error);
+      if (error.code === '23505') { // Unique violation
+        throw new Error("このIDは既に使用されています");
+      }
+      throw new Error("新規登録に失敗しました");
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error("新規登録に失敗しました");
+    }
+
+    const newUser = data[0];
+
+    return {
+      id: newUser.id,
+      name: newUser.name,
+      created_at: newUser.created_at
     };
   }
 };
