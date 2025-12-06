@@ -57,7 +57,7 @@ export const fetchTravels = async (): Promise<TravelRoute[]> => {
 
         // Generate Public URL for the image
         const imageUrl = p.filepath
-          ? supabase.storage.from('points').getPublicUrl(p.filepath).data.publicUrl
+          ? supabase.storage.from('points').getPublicUrl(p.filepath.trim()).data.publicUrl
           : 'https://placehold.co/600x400?text=No+Image';
 
         return {
@@ -152,7 +152,7 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
 
       // Generate Public URL for the image
       const imageUrl = p.filepath
-        ? supabase.storage.from('points').getPublicUrl(p.filepath).data.publicUrl
+        ? supabase.storage.from('points').getPublicUrl(p.filepath.trim()).data.publicUrl
         : 'https://placehold.co/600x400?text=No+Image';
 
       return {

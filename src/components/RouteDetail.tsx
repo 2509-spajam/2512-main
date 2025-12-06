@@ -23,10 +23,10 @@ const { width } = Dimensions.get("window");
 export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const images = [
+  const images = Array.from(new Set([
     route.coverImage,
     ...route.spots.map((spot) => spot.imageUrl),
-  ].filter(Boolean);
+  ])).filter(Boolean);
 
   const totalImages = images.length;
 
