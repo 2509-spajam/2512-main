@@ -1,5 +1,7 @@
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Tabs, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import ScreenWrapper from "../components/ScreenWrapper";
 import { AuthProvider, useAuth } from "../components/AuthContext";
 import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
@@ -32,24 +34,108 @@ function RootLayoutNav() {
   }
 
   return (
-    <>
+    <ScreenWrapper>
       <StatusBar style="auto" />
-      <Stack
+      <Tabs
         screenOptions={{
           headerShown: false,
-          gestureEnabled: true,
+          tabBarActiveTintColor: "#007AFF",
         }}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="signup" />
-        <Stack.Screen name="detail" />
-        <Stack.Screen name="map" />
-        <Stack.Screen name="camera" />
-        <Stack.Screen name="spot-result" />
-        <Stack.Screen name="result" />
-      </Stack>
-    </>
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: "ホーム",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="home" color={color} size={size} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="post"
+          options={{
+            title: "投稿",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="plus-circle"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "プロフィール",
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons
+                name="account"
+                color={color}
+                size={size}
+              />
+            ),
+          }}
+        />
+        {/* Hidden Tabs (Screens) */}
+        <Tabs.Screen
+          name="login"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="signup"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="home"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="detail"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="map"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="camera"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="spot-result"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="result"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+      </Tabs>
+    </ScreenWrapper>
   );
 }
 
@@ -60,4 +146,3 @@ export default function RootLayout() {
     </AuthProvider>
   );
 }
-

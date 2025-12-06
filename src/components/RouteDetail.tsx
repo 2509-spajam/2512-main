@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { TravelRoute } from '../types';
-import { LinearGradient } from 'expo-linear-gradient';
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { TravelRoute } from "../types";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface RouteDetailProps {
   route: TravelRoute;
@@ -18,9 +18,26 @@ interface RouteDetailProps {
   onStartSync: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const images = [
+    route.coverImage,
+    ...route.spots.map((spot) => spot.imageUrl),
+  ].filter(Boolean);
+
+  const totalImages = images.length;
+
+  const handleScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.floor((contentOffsetX + width / 2) / width);
+    if (index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -33,13 +50,25 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: route.coverImage }}
-            style={styles.coverImage}
-            resizeMode="cover"
-          />
+          <ScrollView
+            horizontal={true}
+            pagingEnabled={true}
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          >
+            {images.map((imageUrl, index) => (
+              <Image
+                key={index}
+                source={{ uri: imageUrl }}
+                style={styles.slideImage}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
+
           <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.6)']}
+            colors={["transparent", "rgba(0,0,0,0.6)"]}
             style={styles.gradient}
           />
           <View style={styles.imageOverlay}>
@@ -52,6 +81,14 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
               <Text style={styles.authorNameLarge}>{route.authorName}</Text>
             </View>
           </View>
+
+          {totalImages > 0 && (
+            <View style={styles.pagerContainer}>
+              <Text style={styles.pagerText}>
+                {activeIndex + 1}/{totalImages}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.infoSection}>
@@ -130,7 +167,7 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={['#2563EB', '#3B82F6']}
+            colors={["#2563EB", "#3B82F6"]}
             style={styles.startButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -146,16 +183,16 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
   },
   backButton: {
     padding: 8,
@@ -163,9 +200,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
-    textAlign: 'center',
+    fontWeight: "600",
+    color: "#1F2937",
+    textAlign: "center",
     marginRight: 40,
   },
   headerSpacer: {
@@ -175,69 +212,86 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imageContainer: {
-    width: '100%',
+    width: "100%",
     height: 320,
-    position: 'relative',
+    position: "relative",
+    overflow: "hidden",
   },
-  coverImage: {
-    width: '100%',
-    height: '100%',
+  slideImage: {
+    width,
+    height: "100%",
+    resizeMode: "cover",
   },
   gradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: '60%',
+    height: "60%",
   },
   imageOverlay: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 24,
     left: 24,
     right: 24,
   },
   imageTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: "bold",
+    color: "#FFFFFF",
     marginBottom: 12,
   },
   authorInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   authorAvatarLarge: {
     width: 32,
     height: 32,
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
     marginRight: 8,
   },
   authorNameLarge: {
     fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '500',
+    color: "#FFFFFF",
+    fontWeight: "500",
+  },
+  pagerContainer: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  pagerText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "500",
   },
   infoSection: {
     padding: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: "#E5E7EB",
   },
   description: {
     fontSize: 15,
-    color: '#374151',
+    color: "#374151",
     lineHeight: 22,
     marginBottom: 24,
   },
   statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
   statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     flex: 1,
   },
@@ -246,43 +300,43 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 4,
   },
   statValue: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: "600",
+    color: "#374151",
   },
   metaStats: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 24,
     paddingTop: 24,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#E5E7EB",
   },
   metaStatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   metaStatText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   spotsSection: {
     padding: 24,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
     marginBottom: 16,
   },
   spotCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -291,15 +345,15 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#2563EB',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#2563EB",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 16,
   },
   spotNumberText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   spotInfo: {
     flex: 1,
@@ -307,18 +361,18 @@ const styles = StyleSheet.create({
   },
   spotName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
     marginBottom: 6,
   },
   spotLocation: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   spotLocationText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   spotImage: {
     width: 80,
@@ -328,13 +382,13 @@ const styles = StyleSheet.create({
   footer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderTopColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
   },
   startButton: {
     borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#2563EB',
+    overflow: "hidden",
+    shadowColor: "#2563EB",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -342,12 +396,12 @@ const styles = StyleSheet.create({
   },
   startButtonGradient: {
     paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   startButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
 });
