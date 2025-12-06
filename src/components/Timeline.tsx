@@ -29,17 +29,7 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.tabs}>
-          <View style={[styles.tab, styles.tabActive]}>
-            <Text style={styles.tabTextActive}>人気</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>新着</Text>
-          </View>
-          <View style={styles.tab}>
-            <Text style={styles.tabText}>ランキング</Text>
-          </View>
-        </View>
+        {/* Tabs removed */}
 
         <View style={styles.grid}>
           {routes.map((route) => (
