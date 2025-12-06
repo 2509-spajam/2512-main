@@ -3,6 +3,7 @@ import { View, ActivityIndicator, Text } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ResultView } from '../components/ResultView';
+import { COLORS } from '../constants/colors';
 import { fetchTravelById, saveSynchroTravel } from '../services/travelService';
 import { TravelRoute, CompletedSpot } from '../types';
 
@@ -65,8 +66,8 @@ export default function Result() {
 
   if (loading || isSaving) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
+        <ActivityIndicator size="large" color="#03FFD1" />
         {isSaving && <Text style={{ marginTop: 10, color: '#666' }}>保存中...</Text>}
       </View>
     );

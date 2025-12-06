@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
+import { View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from 'expo-file-system/legacy';
 import { CameraView } from "../components/CameraView";
-import { fetchTravelById, uploadPointImage, createPoint } from "../services/travelService";
+import { LoadingView } from "../components/LoadingView";
+import {
+  fetchTravelById,
+  uploadPointImage,
+  createPoint,
+} from "../services/travelService";
 import { TravelRoute, CompletedSpot } from "../types";
 import { compareImages } from "../utils/pHash";
 import { supabase } from "../lib/supabase";
@@ -47,11 +52,7 @@ export default function Camera() {
   }, [loading, route, router]);
 
   if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
+    return <LoadingView />;
   }
 
   if (!route) {
@@ -62,10 +63,11 @@ export default function Camera() {
     setIsProcessing(true);
     const spot = route.spots[currentSpotIndex];
     let syncRate = 0;
-    let pointId = '';
+    let pointId = "";
 
     try {
       console.log(`Processing capture: ${uri}`);
+
       const start = Date.now();
 
       // 1. Upload Image First (Background or concurrent?)
@@ -122,19 +124,19 @@ export default function Camera() {
       }
 
     } catch (e) {
-      console.error('Failed to process capture', e);
+      console.error("Failed to process capture", e);
       syncRate = 0;
       // Optionally show alert to user
     }
 
-    // Determine the ID to save locally. 
+    // Determine the ID to save locally.
     // Ideally we want the Point ID if available, but for now CompletedSpot uses 'spotId' (which is the route's spot ID).
     // We need to store the *created* point ID to link it later.
     // Let's check the CompletedSpot type definition again or extend it.
     // Assuming we can add a property or use 'userImageUrl' to store local URI.
-    // We need to store `pointId` somewhere. 
+    // We need to store `pointId` somewhere.
     // Let's assume we modify CompletedSpot type or just piggyback.
-    // Wait, the CompletedSpot interface is in types/index.ts. 
+    // Wait, the CompletedSpot interface is in types/index.ts.
     // I should check if I can add a field to it without breaking things, or if I should just use AsyncStorage differently.
 
     // For simplicity and minimal changes, let's update CompletedSpot type to include optional `createdPointId`.
@@ -144,7 +146,7 @@ export default function Camera() {
       syncRate,
       timestamp: new Date().toISOString(),
       userImageUrl: uri,
-      createdPointId: pointId
+      createdPointId: pointId,
     };
 
     try {
@@ -189,15 +191,20 @@ export default function Camera() {
         onClose={handleClose}
       />
       {isProcessing && (
-        <View style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }}>
-          <ActivityIndicator size="large" color="#ffffff" />
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <LoadingView />
         </View>
       )}
     </View>

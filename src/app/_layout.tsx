@@ -3,16 +3,35 @@ import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { AuthProvider, useAuth } from "../components/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
+import { COLORS } from "../constants/colors";
+import {
+  useFonts,
+  Orbitron_400Regular,
+  Orbitron_500Medium,
+  Orbitron_600SemiBold,
+  Orbitron_700Bold,
+  Orbitron_800ExtraBold,
+  Orbitron_900Black,
+} from "@expo-google-fonts/orbitron";
 
 function RootLayoutNav() {
   const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
+  const [fontsLoaded] = useFonts({
+    Orbitron_400Regular,
+    Orbitron_500Medium,
+    Orbitron_600SemiBold,
+    Orbitron_700Bold,
+    Orbitron_800ExtraBold,
+    Orbitron_900Black,
+  });
+
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !fontsLoaded) return;
 
     const inAuthGroup = segments[0] === "login" || segments[0] === "signup";
 
@@ -21,13 +40,20 @@ function RootLayoutNav() {
       router.replace("/login");
     } else if (user && inAuthGroup) {
       // Redirect back to the home page if authenticated
-      router.replace('/');
+      router.replace("/");
     }
-  }, [user, isLoading, segments]);
+  }, [user, isLoading, segments, fontsLoaded]);
 
-  if (isLoading) {
+  if (isLoading || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: COLORS.BACKGROUND,
+        }}
+      >
         <ActivityIndicator size="large" />
       </View>
     );
@@ -39,7 +65,11 @@ function RootLayoutNav() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: "#007AFF",
+          tabBarActiveTintColor: "#03FFD1",
+          tabBarStyle: {
+            backgroundColor: COLORS.BACKGROUND,
+            borderTopWidth: 0,
+          },
         }}
       >
         <Tabs.Screen
@@ -101,8 +131,6 @@ function RootLayoutNav() {
             tabBarStyle: { display: "none" },
           }}
         />
-        {/* 'home' is already defined above */}
-
         <Tabs.Screen
           name="detail"
           options={{
@@ -138,7 +166,7 @@ function RootLayoutNav() {
             tabBarStyle: { display: "none" },
           }}
         />
-        {/* Hidden timeline page if it still exists */}
+
       </Tabs>
     </ScreenWrapper >
   );

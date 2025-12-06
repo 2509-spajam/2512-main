@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { COLORS } from "../constants/colors";
 
 const { width } = Dimensions.get("window");
 const IMAGE_SIZE = (width - 48) / 3;
@@ -99,7 +100,7 @@ export default function PostScreen() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Feather name="arrow-left" size={24} color="#1F2937" />
+            <Feather name="arrow-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>投稿</Text>
           <View style={styles.headerSpacer} />
@@ -177,7 +178,7 @@ export default function PostScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     flexDirection: "row",
@@ -186,8 +187,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderBottomColor: "#374151",
+    backgroundColor: "#192130",
   },
   backButton: {
     padding: 8,
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#FFFFFF",
   },
   headerSpacer: {
     width: 40,
@@ -211,28 +212,28 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
   titleInput: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#374151",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: "#1F2937",
+    color: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#4B5563",
   },
   descriptionInput: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#374151",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: "#1F2937",
+    color: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#4B5563",
     minHeight: 120,
   },
   imagePickerButton: {
@@ -240,11 +241,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#374151",
     borderRadius: 12,
     paddingVertical: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#4B5563",
     borderStyle: "dashed",
   },
   imagePickerText: {
@@ -282,8 +283,8 @@ const styles = StyleSheet.create({
   footer: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
+    borderTopColor: "#374151",
+    backgroundColor: "#192130",
   },
   submitButton: {
     borderRadius: 12,
