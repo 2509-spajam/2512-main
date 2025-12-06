@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { sessionState } from "../lib/session";
 
 export default function Index() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (sessionState.hasSeenKV) {
+      router.replace("/home");
+    }
+  }, []);
+
+  const handleStart = () => {
+    sessionState.hasSeenKV = true;
+    router.replace("/home");
+  };
 
   return (
     <View style={styles.container}>
@@ -13,7 +25,7 @@ export default function Index() {
           styles.button,
           pressed && styles.buttonPressed,
         ]}
-        onPress={() => router.push("/timeline")}
+        onPress={handleStart}
       >
         <Text style={styles.buttonText}>タイムラインを見る</Text>
       </Pressable>
@@ -45,5 +57,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });

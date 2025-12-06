@@ -50,7 +50,7 @@ function RootLayoutNav() {
           }}
         />
         <Tabs.Screen
-          name="timeline"
+          name="home"
           options={{
             title: "ホーム",
             tabBarIcon: ({ color, size }) => (
@@ -99,13 +99,8 @@ function RootLayoutNav() {
             tabBarStyle: { display: "none" },
           }}
         />
-        <Tabs.Screen
-          name="home"
-          options={{
-            href: null,
-            tabBarStyle: { display: "none" },
-          }}
-        />
+        {/* 'home' is already defined above */}
+
         <Tabs.Screen
           name="detail"
           options={{
