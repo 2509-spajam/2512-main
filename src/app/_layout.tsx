@@ -16,6 +16,13 @@ export default function RootLayout() {
         <Tabs.Screen
           name="index"
           options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="timeline"
+          options={{
             title: "ホーム",
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="home" color={color} size={size} />
