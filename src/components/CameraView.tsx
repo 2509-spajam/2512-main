@@ -158,7 +158,6 @@ export function CameraView({
         <View style={styles.opacityControl}>
           <View style={styles.opacityControlContainer}>
             <Entypo name="light-up" size={24} color="#FFFFFF" />
-            
             <View
               style={styles.sliderContainer}
               {...panResponder.panHandlers}
@@ -180,7 +179,6 @@ export function CameraView({
                 pointerEvents="none" 
               />
             </View>
-            
             <Entypo name="light-down" size={24} color="#FFFFFF" />
           </View>
         </View>
