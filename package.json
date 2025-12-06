@@ -39,5 +39,8 @@
     "react-native-url-polyfill": "^3.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "dotenv": "^17.2.3"
+  }
 }
