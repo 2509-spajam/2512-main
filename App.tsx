@@ -1,37 +1,37 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { Timeline } from './src/components/Timeline';
-import { RouteDetail } from './src/components/RouteDetail';
-import { MapViewComponent } from './src/components/MapView';
-import { CameraView } from './src/components/CameraView';
-import { SpotResultView } from './src/components/SpotResultView';
-import { ResultView } from './src/components/ResultView';
-import { mockRoutes } from './src/data/mockData';
-import { TravelRoute, CompletedSpot } from './src/types';
+import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import { Timeline } from "./src/components/Timeline";
+import { RouteDetail } from "./src/components/RouteDetail";
+import { MapViewComponent } from "./src/components/MapView";
+import { CameraView } from "./src/components/CameraView";
+import { SpotResultView } from "./src/components/SpotResultView";
+import { ResultView } from "./src/components/ResultView";
+import { mockRoutes } from "./src/data/mockData";
+import { TravelRoute, CompletedSpot } from "./src/types";
 
-type View = 'timeline' | 'detail' | 'map' | 'camera' | 'spotResult' | 'result';
+type View = "timeline" | "detail" | "map" | "camera" | "spotResult" | "result";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<View>('timeline');
+  const [currentView, setCurrentView] = useState<View>("timeline");
   const [selectedRoute, setSelectedRoute] = useState<TravelRoute | null>(null);
   const [completedSpots, setCompletedSpots] = useState<CompletedSpot[]>([]);
   const [selectedSpotIndex, setSelectedSpotIndex] = useState<number>(0);
 
   const handleRouteSelect = (route: TravelRoute) => {
     setSelectedRoute(route);
-    setCurrentView('detail');
+    setCurrentView("detail");
   };
 
   const handleStartSync = () => {
     if (!selectedRoute) return;
     setCompletedSpots([]);
-    setCurrentView('map');
+    setCurrentView("map");
   };
 
   const handleSpotSelect = (spotId: string, spotIndex: number) => {
     if (!selectedRoute) return;
     setSelectedSpotIndex(spotIndex);
-    setCurrentView('camera');
+    setCurrentView("camera");
   };
 
   const handleCapture = (spotId: string) => {
@@ -53,35 +53,35 @@ export default function App() {
     ];
 
     setCompletedSpots(newCompletedSpots);
-    setCurrentView('spotResult');
+    setCurrentView("spotResult");
   };
 
   const handleBackToTimeline = () => {
-    setCurrentView('timeline');
+    setCurrentView("timeline");
     setSelectedRoute(null);
     setCompletedSpots([]);
     setSelectedSpotIndex(0);
   };
 
   const handleBackToMap = () => {
-    setCurrentView('map');
+    setCurrentView("map");
   };
 
   const handleCloseCamera = () => {
-    setCurrentView('map');
+    setCurrentView("map");
   };
 
   const handleShowResult = () => {
-    setCurrentView('result');
+    setCurrentView("result");
   };
 
   return (
     <>
-      {currentView === 'timeline' && (
+      {currentView === "timeline" && (
         <Timeline routes={mockRoutes} onRouteSelect={handleRouteSelect} />
       )}
 
-      {currentView === 'detail' && selectedRoute && (
+      {currentView === "detail" && selectedRoute && (
         <RouteDetail
           route={selectedRoute}
           onBack={handleBackToTimeline}
@@ -89,7 +89,7 @@ export default function App() {
         />
       )}
 
-      {currentView === 'map' && selectedRoute && (
+      {currentView === "map" && selectedRoute && (
         <MapViewComponent
           route={selectedRoute}
           completedSpots={completedSpots}
@@ -99,7 +99,7 @@ export default function App() {
         />
       )}
 
-      {currentView === 'camera' && selectedRoute && (
+      {currentView === "camera" && selectedRoute && (
         <CameraView
           route={selectedRoute}
           currentSpotIndex={selectedSpotIndex}
@@ -108,24 +108,26 @@ export default function App() {
         />
       )}
 
-      {currentView === 'spotResult' && selectedRoute && (() => {
-        const completedSpot = completedSpots.find(
-          (s) => s.spotId === selectedRoute.spots[selectedSpotIndex].id
-        );
-        if (!completedSpot) {
-          setCurrentView('map');
-          return null;
-        }
-        return (
-          <SpotResultView
-            spot={selectedRoute.spots[selectedSpotIndex]}
-            completedSpot={completedSpot}
-            onBackToMap={handleBackToMap}
-          />
-        );
-      })()}
+      {currentView === "spotResult" &&
+        selectedRoute &&
+        (() => {
+          const completedSpot = completedSpots.find(
+            (s) => s.spotId === selectedRoute.spots[selectedSpotIndex].id
+          );
+          if (!completedSpot) {
+            setCurrentView("map");
+            return null;
+          }
+          return (
+            <SpotResultView
+              spot={selectedRoute.spots[selectedSpotIndex]}
+              completedSpot={completedSpot}
+              onBackToMap={handleBackToMap}
+            />
+          );
+        })()}
 
-      {currentView === 'result' && selectedRoute && (
+      {currentView === "result" && selectedRoute && (
         <ResultView
           route={selectedRoute}
           completedSpots={completedSpots}
