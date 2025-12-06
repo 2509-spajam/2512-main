@@ -17,6 +17,7 @@ export default function Camera() {
   }>();
   const [route, setRoute] = useState<TravelRoute | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const currentSpotIndex = spotIndex ? parseInt(spotIndex, 10) : 0;
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function Camera() {
   }
 
   const handleCapture = async (spotId: string, uri: string) => {
+    setIsProcessing(true);
     const spot = route.spots[currentSpotIndex];
     let syncRate = 0;
     let pointId = '';
@@ -132,6 +134,8 @@ export default function Camera() {
       });
     } catch (error) {
       console.error("Error saving completed spot:", error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -140,11 +144,25 @@ export default function Camera() {
   };
 
   return (
-    <CameraView
-      route={route}
-      currentSpotIndex={currentSpotIndex}
-      onCapture={handleCapture}
-      onClose={handleClose}
-    />
+    <View style={{ flex: 1 }}>
+      <CameraView
+        route={route}
+        currentSpotIndex={currentSpotIndex}
+        onCapture={handleCapture}
+        onClose={handleClose}
+      />
+      {isProcessing && (
+        <View style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      )}
+    </View>
   );
 }

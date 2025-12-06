@@ -80,11 +80,21 @@ export default function Result() {
     router.replace('/');
   };
 
+  const handleShowOriginal = () => {
+    if (route && route.originTravelId) {
+      router.push({
+        pathname: "/detail",
+        params: { routeId: route.originTravelId },
+      });
+    }
+  };
+
   return (
     <ResultView
       route={route}
       completedSpots={completedSpots}
       onBack={handleBack}
+      onShowOriginal={handleShowOriginal}
     />
   );
 }

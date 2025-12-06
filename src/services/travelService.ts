@@ -19,11 +19,11 @@ const getUserId = async (): Promise<string | null> => {
   }
 };
 
-export const fetchTravels = async (): Promise<TravelRoute[]> => {
+export const fetchTravels = async (type: 'all' | 'original' | 'sync' = 'all'): Promise<TravelRoute[]> => {
   try {
     // 1. Fetch travels with user info (assuming a relation or basic join if foreign key exists)
     // defined constraint: travels_user_id_fkey foreign KEY (user_id) references users (id)
-    const { data: travels, error: travelError } = await supabase
+    let query = supabase
       .from('travels')
       .select(`
         *,
@@ -32,6 +32,17 @@ export const fetchTravels = async (): Promise<TravelRoute[]> => {
         )
       `)
       .order('started_at', { ascending: false });
+
+    // Apply filters
+    if (type === 'original') {
+      // Original travels have null origin_travel_id
+      query = query.is('origin_travel_id', null);
+    } else if (type === 'sync') {
+      // Sync travels have a non-null origin_travel_id
+      query = query.not('origin_travel_id', 'is', null);
+    }
+
+    const { data: travels, error: travelError } = await query;
 
     if (travelError) {
       console.error('Error fetching travels:', travelError);
@@ -113,6 +124,7 @@ export const fetchTravels = async (): Promise<TravelRoute[]> => {
         description: travel.description || '',
         totalDistance: '--- km', // Placeholder, calculation would need lat/lng math
         duration: durationStr,
+        originTravelId: travel.origin_travel_id
       };
     });
 
@@ -146,19 +158,9 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
     const travel = travels[0];
     let pointIds = travel.points || [];
 
-    // If this is a sync travel (has origin_travel_id), we want to show the ORIGINAL spots as the route
-    // The user's progress (actual visited points) would be treated separately or overlayed
-    if (travel.origin_travel_id) {
-      const { data: originTravel } = await supabase
-        .from('travels')
-        .select('points')
-        .eq('id', travel.origin_travel_id)
-        .single();
-
-      if (originTravel && originTravel.points) {
-        pointIds = originTravel.points;
-      }
-    }
+    // NOTE: Previously we swapped points with origin points here.
+    // We removed that to allow the detail view of a Sync travel to show the USER'S photos.
+    // If the original route is needed, client should request it via origin_travel_id.
 
     let pointsMap: Record<string, any> = {};
 
@@ -221,6 +223,7 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
       description: travel.description || '',
       totalDistance: '--- km',
       duration: durationStr,
+      originTravelId: travel.origin_travel_id
     };
   } catch (error) {
     console.error('Unexpected error in fetchTravelById:', error);

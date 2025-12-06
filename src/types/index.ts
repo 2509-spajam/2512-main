@@ -20,6 +20,7 @@ export interface TravelRoute {
   description: string;
   totalDistance: string;
   duration: string;
+  originTravelId?: string;
 }
 
 export interface SyncProgress {
