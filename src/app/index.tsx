@@ -1,16 +1,14 @@
 import React, { useEffect } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Redirect } from "expo-router";
 import { sessionState } from "../lib/session";
 
 export default function Index() {
   const router = useRouter();
 
-  useEffect(() => {
-    if (sessionState.hasSeenKV) {
-      router.replace("/home");
-    }
-  }, []);
+  if (sessionState.hasSeenKV) {
+    return <Redirect href="/home" />;
+  }
 
   const handleStart = () => {
     sessionState.hasSeenKV = true;
