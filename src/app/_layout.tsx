@@ -21,7 +21,7 @@ function RootLayoutNav() {
       router.replace('/login');
     } else if (user && inAuthGroup) {
       // Redirect back to the home page if authenticated
-      router.replace('/');
+      router.replace('/home');
     }
   }, [user, isLoading, segments]);
 

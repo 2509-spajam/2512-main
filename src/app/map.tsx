@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MapViewComponent } from '../components/MapView';
-import { mockRoutes } from '../data/mockData';
+import { fetchTravelById } from '../services/travelService';
 import { TravelRoute, CompletedSpot } from '../types';
 
 const COMPLETED_SPOTS_KEY = 'completedSpots';
@@ -11,6 +12,7 @@ export default function Map() {
   const router = useRouter();
   const { routeId } = useLocalSearchParams<{ routeId: string }>();
   const [route, setRoute] = useState<TravelRoute | null>(null);
+  const [loading, setLoading] = useState(true);
   const [completedSpots, setCompletedSpots] = useState<CompletedSpot[]>([]);
 
   const loadCompletedSpots = useCallback(async () => {
@@ -30,20 +32,44 @@ export default function Map() {
   }, [routeId]);
 
   useEffect(() => {
-    const foundRoute = mockRoutes.find((r) => r.id === routeId);
-    if (!foundRoute) {
+    const loadRoute = async () => {
+      if (!routeId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await fetchTravelById(routeId);
+        setRoute(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRoute();
+  }, [routeId]);
+
+  useEffect(() => {
+    if (!loading && !route) {
       router.replace('/');
-      return;
+    } else if (!loading && route) {
+      loadCompletedSpots();
     }
-    setRoute(foundRoute);
-    loadCompletedSpots();
-  }, [routeId, router, loadCompletedSpots]);
+  }, [loading, route, router, loadCompletedSpots]);
 
   useFocusEffect(
     useCallback(() => {
       loadCompletedSpots();
     }, [loadCompletedSpots])
   );
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   if (!route) {
     return null;

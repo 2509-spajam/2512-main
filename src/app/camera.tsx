@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraView } from "../components/CameraView";
-import { mockRoutes } from "../data/mockData";
+import { fetchTravelById } from "../services/travelService";
 import { TravelRoute, CompletedSpot } from "../types";
 import { compareImages } from "../utils/pHash";
 
@@ -15,16 +16,40 @@ export default function Camera() {
     spotIndex: string;
   }>();
   const [route, setRoute] = useState<TravelRoute | null>(null);
+  const [loading, setLoading] = useState(true);
   const currentSpotIndex = spotIndex ? parseInt(spotIndex, 10) : 0;
 
   useEffect(() => {
-    const foundRoute = mockRoutes.find((r) => r.id === routeId);
-    if (!foundRoute) {
+    const loadRoute = async () => {
+      if (!routeId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await fetchTravelById(routeId);
+        setRoute(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRoute();
+  }, [routeId]);
+
+  useEffect(() => {
+    if (!loading && !route) {
       router.replace("/");
-      return;
     }
-    setRoute(foundRoute);
-  }, [routeId, router]);
+  }, [loading, route, router]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   if (!route) {
     return null;
