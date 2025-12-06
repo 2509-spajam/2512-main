@@ -10,8 +10,9 @@ import {
   Image,
   Alert,
   Dimensions,
-  ActivityIndicator,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useRouter } from "expo-router";
@@ -21,12 +22,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import ScreenWrapper from "../components/ScreenWrapper";
 
 const { width } = Dimensions.get("window");
-const IMAGE_WIDTH = width - 32; // padding 16 * 2を引いた幅
-const IMAGE_HEIGHT = 200; // 例: 高さを200pxに固定
 
 export default function PostScreen() {
   const router = useRouter();
   const mapRef = useRef<any>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -38,6 +38,8 @@ export default function PostScreen() {
       name?: string;
     } | null)[]
   >([]);
+  // 各画像に対応する名前 (画像と同じインデックスで管理)
+  const [imageNames, setImageNames] = useState<string[]>([]);
   // マップモーダル制御
   const [mapModalVisible, setMapModalVisible] = useState(false);
   const [mapTargetIndex, setMapTargetIndex] = useState<number | null>(null);
@@ -45,12 +47,10 @@ export default function PostScreen() {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [tempName, setTempName] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<
     Array<{ display_name: string; lat: string; lon: string }>
   >([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   // debounce: 検索キーワード入力に対して遅延検索を行う
   useEffect(() => {
@@ -119,6 +119,8 @@ export default function PostScreen() {
         setImages([...images, ...newImages]);
         // 画像に対応する位置配列を拡張（初期は null）
         setImageLocations((prev) => [...prev, ...newImages.map(() => null)]);
+        // 画像に対応する名前配列を拡張（初期は空文字）
+        setImageNames((prev) => [...prev, ...newImages.map(() => "")]);
       }
     } catch (error) {
       console.error("Error picking images:", error);
@@ -129,6 +131,7 @@ export default function PostScreen() {
   const handleRemoveImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
     setImageLocations(imageLocations.filter((_, i) => i !== index));
+    setImageNames(imageNames.filter((_, i) => i !== index));
   };
 
   const openMapForImage = (index: number) => {
@@ -140,7 +143,6 @@ export default function PostScreen() {
         ? { latitude: existing.latitude, longitude: existing.longitude }
         : { latitude: 35.6762, longitude: 139.6503 }
     );
-    setTempName(existing?.name || "");
     setMapModalVisible(true);
   };
 
@@ -152,7 +154,7 @@ export default function PostScreen() {
     const newLoc = {
       latitude: tempCoord.latitude,
       longitude: tempCoord.longitude,
-      name: tempName || "",
+      name: imageNames[mapTargetIndex] || "",
     };
     setImageLocations((prev) => {
       const next = [...prev];
@@ -166,7 +168,6 @@ export default function PostScreen() {
     const q = query !== undefined ? query : searchQuery;
     if (!q || q.trim().length === 0) return;
     try {
-      setIsSearching(true);
       const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(
         q
       )}`;
@@ -181,8 +182,6 @@ export default function PostScreen() {
     } catch (e) {
       console.error("Place search error:", e);
       setSearchResults([]);
-    } finally {
-      setIsSearching(false);
     }
   };
 
@@ -194,7 +193,13 @@ export default function PostScreen() {
     const lat = parseFloat(item.lat);
     const lon = parseFloat(item.lon);
     setTempCoord({ latitude: lat, longitude: lon });
-    setTempName(item.display_name);
+    if (mapTargetIndex !== null) {
+      setImageNames((prev) => {
+        const next = [...prev];
+        next[mapTargetIndex] = item.display_name;
+        return next;
+      });
+    }
     setSearchResults([]);
     setSearchQuery("");
   };
@@ -242,106 +247,152 @@ export default function PostScreen() {
           <View style={styles.headerSpacer} />
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.formSection}>
-            <Text style={styles.label}>タイトル</Text>
-            <TextInput
-              style={styles.titleInput}
-              placeholder="タイトル"
-              placeholderTextColor="#9CA3AF"
-              value={title}
-              onChangeText={setTitle}
-            />
-          </View>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        >
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
+            <View style={styles.formSection}>
+              <Text style={styles.label}>タイトル</Text>
+              <TextInput
+                style={styles.titleInput}
+                placeholder="タイトル"
+                placeholderTextColor="#9CA3AF"
+                value={title}
+                onChangeText={setTitle}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+                  }, 100);
+                }}
+              />
+            </View>
 
-          <View style={styles.formSection}>
-            <Text style={styles.label}>説明</Text>
-            <TextInput
-              style={styles.descriptionInput}
-              placeholder="説明"
-              placeholderTextColor="#9CA3AF"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-            />
-          </View>
+            <View style={styles.formSection}>
+              <Text style={styles.label}>説明</Text>
+              <TextInput
+                style={styles.descriptionInput}
+                placeholder="説明"
+                placeholderTextColor="#9CA3AF"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={6}
+                textAlignVertical="top"
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollTo({ y: 200, animated: true });
+                  }, 100);
+                }}
+              />
+            </View>
 
-          {/* 写真に位置情報が付与されるため、ルート位置選択UIは不要になりました */}
+            {/* 写真に位置情報が付与されるため、ルート位置選択UIは不要になりました */}
 
-          <View style={styles.formSection}>
-            <Text style={styles.label}>画像（1枚以上）</Text>
-            <TouchableOpacity
-              style={styles.imagePickerButton}
-              onPress={handlePickImages}
-            >
-              <Feather name="image" size={24} color="#2563EB" />
-              <Text style={styles.imagePickerText}>画像を選択</Text>
-            </TouchableOpacity>
+            <View style={styles.formSection}>
+              <Text style={styles.label}>画像（1枚以上）</Text>
+              <TouchableOpacity
+                style={styles.imagePickerButton}
+                onPress={handlePickImages}
+              >
+                <Feather name="image" size={24} color="#2563EB" />
+                <Text style={styles.imagePickerText}>画像を選択</Text>
+              </TouchableOpacity>
 
-            {images.length > 0 && (
-              <View>
-                <View style={styles.imageGrid}>
+              {images.length > 0 && (
+                <View style={styles.imageCardsContainer}>
                   {images.map((uri, index) => (
-                    <View key={index} style={styles.imageContainer}>
-                      <Image
-                        source={{ uri }}
-                        style={styles.image}
-                        resizeMode="cover"
-                      />
-                      <TouchableOpacity
-                        style={styles.removeButton}
-                        onPress={() => handleRemoveImage(index)}
-                      >
-                        <Feather name="x" size={16} color="#FFFFFF" />
-                      </TouchableOpacity>
-
-                      {/* Pin ボタン: 画像ごとに位置を割り当て */}
-                      <TouchableOpacity
-                        style={styles.imagePinButton}
-                        onPress={() => openMapForImage(index)}
-                      >
-                        <Feather
-                          name="map-pin"
-                          size={16}
-                          color={imageLocations[index] ? "#10B981" : "#FFFFFF"}
+                    <View key={index} style={styles.imageCard}>
+                      <View style={styles.spotNumber}>
+                        <Text style={styles.spotNumberText}>{index + 1}</Text>
+                      </View>
+                      <View style={styles.spotInfo}>
+                        <TextInput
+                          style={styles.spotNameInput}
+                          placeholder="場所名を入力"
+                          placeholderTextColor="#9CA3AF"
+                          value={imageNames[index] || ""}
+                          onChangeText={(text) => {
+                            setImageNames((prev) => {
+                              const next = [...prev];
+                              next[index] = text;
+                              return next;
+                            });
+                          }}
+                          onFocus={() => {
+                            setTimeout(() => {
+                              scrollViewRef.current?.scrollToEnd({
+                                animated: true,
+                              });
+                            }, 100);
+                          }}
                         />
-                      </TouchableOpacity>
-
-                      {/* 小さなラベル: 位置がある場合は表示 */}
-                      {imageLocations[index] && (
-                        <View style={styles.imagePinLabel}>
-                          <Text style={styles.imagePinLabelText}>位置あり</Text>
-                        </View>
-                      )}
+                        <TouchableOpacity
+                          style={styles.locationButton}
+                          onPress={() => openMapForImage(index)}
+                        >
+                          <Feather
+                            name="map-pin"
+                            size={14}
+                            color={
+                              imageLocations[index] ? "#10B981" : "#6B7280"
+                            }
+                          />
+                          <Text
+                            style={[
+                              styles.locationButtonText,
+                              imageLocations[index] &&
+                                styles.locationButtonTextActive,
+                            ]}
+                          >
+                            {imageLocations[index]
+                              ? `${imageLocations[index].latitude.toFixed(
+                                  4
+                                )}, ${imageLocations[index].longitude.toFixed(
+                                  4
+                                )}`
+                              : "位置を選択"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.spotImageContainer}>
+                        <Image
+                          source={{ uri }}
+                          style={styles.spotImage}
+                          resizeMode="cover"
+                        />
+                        <TouchableOpacity
+                          style={styles.removeButton}
+                          onPress={() => handleRemoveImage(index)}
+                        >
+                          <Feather name="x" size={16} color="#FFFFFF" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   ))}
                 </View>
-
-                {/* Debug: show selected URIs to help troubleshoot display issues */}
-                <View style={styles.debugUriList}>
-                  {images.map((u, i) => (
-                    <Text key={i} style={styles.debugUriText} numberOfLines={1}>
-                      {u}
-                    </Text>
-                  ))}
-                </View>
-              </View>
-            )}
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <LinearGradient
-              colors={["#2563EB", "#1D4ED8"]}
-              style={styles.submitButtonGradient}
+              )}
+            </View>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
             >
-              <Text style={styles.submitButtonText}>投稿</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+              <LinearGradient
+                colors={["#2563EB", "#1D4ED8"]}
+                style={styles.submitButtonGradient}
+              >
+                <Text style={styles.submitButtonText}>投稿</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
 
       <Modal
@@ -385,20 +436,6 @@ export default function PostScreen() {
               onSubmitEditing={() => searchPlace()}
               style={styles.searchInput}
             />
-            <TouchableOpacity
-              style={styles.searchButton}
-              onPress={() => {
-                // 手動検索（デバウンスとは別に即時検索したい場合）
-                searchPlace(searchQuery);
-                Keyboard.dismiss();
-              }}
-            >
-              {isSearching ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text style={styles.searchButtonText}>検索</Text>
-              )}
-            </TouchableOpacity>
           </View>
 
           {searchResults.length > 0 && (
@@ -419,24 +456,6 @@ export default function PostScreen() {
               ))}
             </View>
           )}
-
-          <View
-            style={{
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              backgroundColor: "#FFFFFF",
-            }}
-          >
-            <Text style={{ fontSize: 13, color: "#374151", marginBottom: 6 }}>
-              場所名（任意）
-            </Text>
-            <TextInput
-              value={tempName}
-              onChangeText={setTempName}
-              placeholder="例: 渋谷駅前"
-              style={styles.modalInput}
-            />
-          </View>
 
           <MapView
             provider={PROVIDER_GOOGLE}
@@ -466,8 +485,6 @@ export default function PostScreen() {
   );
 }
 
-// Map modal is declared after component return so we need to export a separate render for it.
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -493,6 +510,9 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -546,27 +566,72 @@ const styles = StyleSheet.create({
     color: "#2563EB",
     fontWeight: "600",
   },
-  imageGrid: {
-    // flexDirection: "row", // 削除
-    // flexWrap: "wrap",     // 削除
-    gap: 16, // 縦の隙間を16pxに
+  imageCardsContainer: {
     marginTop: 16,
+    gap: 12,
   },
-  imageContainer: {
+  imageCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 16,
+  },
+  spotNumber: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#2563EB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  spotNumberText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  spotInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  spotNameInput: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 8,
+  },
+  locationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  locationButtonText: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  locationButtonTextActive: {
+    color: "#10B981",
+    fontWeight: "500",
+  },
+  spotImageContainer: {
     position: "relative",
-    width: IMAGE_WIDTH, // 修正
-    height: IMAGE_HEIGHT, // 修正
-    marginBottom: 8, // 各コンテナの下に少しスペースを追加
   },
-  image: {
-    width: "100%",
-    height: "100%",
+  spotImage: {
+    width: 80,
+    height: 80,
     borderRadius: 8,
   },
   removeButton: {
     position: "absolute",
-    top: 4,
-    right: 4,
+    top: -4,
+    right: -4,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -581,6 +646,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   submitButton: {
+    margin: 16,
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#2563EB",
@@ -599,75 +665,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFFFFF",
   },
-
-  debugUriList: {
-    marginTop: 8,
-    paddingHorizontal: 8,
-  },
-  debugUriText: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginBottom: 4,
-  },
-  imagePinButton: {
-    position: "absolute",
-    bottom: 8,
-    left: 8,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  imagePinLabel: {
-    position: "absolute",
-    bottom: 8,
-    right: 8,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  imagePinLabelText: {
-    fontSize: 12,
-    color: "#065F46",
-    fontWeight: "600",
-  },
-  modalInput: {
-    backgroundColor: "#F3F4F6",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-  },
   searchContainer: {
-    flexDirection: "row",
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    gap: 8,
   },
   searchInput: {
-    flex: 1,
     backgroundColor: "#F3F4F6",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-  },
-  searchButton: {
-    backgroundColor: "#2563EB",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  searchButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
   },
   searchResults: {
     maxHeight: 160,
