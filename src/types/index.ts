@@ -20,6 +20,7 @@ export interface TravelRoute {
   description: string;
   totalDistance: string;
   duration: string;
+  originTravelId?: string;
 }
 
 export interface SyncProgress {
@@ -34,4 +35,5 @@ export interface CompletedSpot {
   userImageUrl?: string;
   syncRate: number;
   timestamp: string;
+  createdPointId?: string;
 }

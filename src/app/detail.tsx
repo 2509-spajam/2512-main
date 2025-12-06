@@ -59,7 +59,21 @@ export default function Detail() {
     });
   };
 
+  const handleShowOriginal = () => {
+    if (route && route.originTravelId) {
+      router.push({
+        pathname: "/detail",
+        params: { routeId: route.originTravelId },
+      });
+    }
+  };
+
   return (
-    <RouteDetail route={route} onBack={handleBack} onStartSync={handleStartSync} />
+    <RouteDetail
+      route={route}
+      onBack={() => router.back()}
+      onStartSync={handleStartSync}
+      onShowOriginal={handleShowOriginal}
+    />
   );
 }

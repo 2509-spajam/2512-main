@@ -1,11 +1,29 @@
 import { supabase } from '../lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TravelRoute, TravelSpot } from '../types';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Buffer } from 'buffer';
 
-export const fetchTravels = async (): Promise<TravelRoute[]> => {
+// Helper to get authenticated user ID from AsyncStorage
+const getUserId = async (): Promise<string | null> => {
+  try {
+    const jsonValue = await AsyncStorage.getItem('@auth_user');
+    if (jsonValue != null) {
+      const user = JSON.parse(jsonValue);
+      return user.id;
+    }
+    return null;
+  } catch (e) {
+    console.error("Failed to get user ID", e);
+    return null;
+  }
+};
+
+export const fetchTravels = async (type: 'all' | 'original' | 'sync' = 'all'): Promise<TravelRoute[]> => {
   try {
     // 1. Fetch travels with user info (assuming a relation or basic join if foreign key exists)
     // defined constraint: travels_user_id_fkey foreign KEY (user_id) references users (id)
-    const { data: travels, error: travelError } = await supabase
+    let query = supabase
       .from('travels')
       .select(`
         *,
@@ -14,6 +32,17 @@ export const fetchTravels = async (): Promise<TravelRoute[]> => {
         )
       `)
       .order('started_at', { ascending: false });
+
+    // Apply filters
+    if (type === 'original') {
+      // Original travels have null origin_travel_id
+      query = query.is('origin_travel_id', null);
+    } else if (type === 'sync') {
+      // Sync travels have a non-null origin_travel_id
+      query = query.not('origin_travel_id', 'is', null);
+    }
+
+    const { data: travels, error: travelError } = await query;
 
     if (travelError) {
       console.error('Error fetching travels:', travelError);
@@ -95,6 +124,7 @@ export const fetchTravels = async (): Promise<TravelRoute[]> => {
         description: travel.description || '',
         totalDistance: '--- km', // Placeholder, calculation would need lat/lng math
         duration: durationStr,
+        originTravelId: travel.origin_travel_id
       };
     });
 
@@ -126,7 +156,11 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
     if (!travels || travels.length === 0) return null;
 
     const travel = travels[0];
-    const pointIds = travel.points || [];
+    let pointIds = travel.points || [];
+
+    // NOTE: Previously we swapped points with origin points here.
+    // We removed that to allow the detail view of a Sync travel to show the USER'S photos.
+    // If the original route is needed, client should request it via origin_travel_id.
 
     let pointsMap: Record<string, any> = {};
 
@@ -189,9 +223,113 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
       description: travel.description || '',
       totalDistance: '--- km',
       duration: durationStr,
+      originTravelId: travel.origin_travel_id
     };
   } catch (error) {
     console.error('Unexpected error in fetchTravelById:', error);
+    return null;
+  }
+};
+
+// --- Sync & Camera Integration ---
+
+export const saveSynchroTravel = async (originTravelId: string, pointIds: string[]): Promise<string | null> => {
+  try {
+    const userId = await getUserId();
+    if (!userId) throw new Error('User not authenticated');
+
+    // Get origin travel title to append (Sync)
+    const { data: origin } = await supabase
+      .from('travels')
+      .select('title')
+      .eq('id', originTravelId)
+      .single();
+
+    const newTitle = origin ? `${origin.title} (Sync)` : 'Synchro Travel';
+    const now = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('travels')
+      .insert({
+        user_id: userId,
+        origin_travel_id: originTravelId,
+        started_at: now,
+        finished_at: now, // Set finished_at as we are saving at the end
+        title: newTitle,
+        points: pointIds
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Error saving synchro travel:', error);
+      throw error;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error('Unexpected error in saveSynchroTravel:', error);
+    return null;
+  }
+};
+
+
+
+export const uploadPointImage = async (uri: string): Promise<string | null> => {
+  try {
+    const userId = await getUserId();
+    if (!userId) throw new Error('User not authenticated');
+
+    const ext = uri.split('.').pop() || 'jpg';
+    const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '');
+    const filename = `${userId}/${timestamp}.${ext}`;
+
+    // Use FileSystem and Buffer for reliable upload in Expo/RN
+    const base64 = await FileSystem.readAsStringAsync(uri, {
+      encoding: 'base64',
+    });
+    const buffer = Buffer.from(base64, 'base64');
+
+    const { data, error } = await supabase.storage
+      .from('points')
+      .upload(filename, buffer, {
+        contentType: `image/${ext}`,
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+
+    return data.path;
+  } catch (error) {
+    console.error('Error in uploadPointImage:', error);
+    return null;
+  }
+};
+
+export const createPoint = async (lat: number, lng: number, filepath: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('points')
+      .insert({
+        lat,
+        lng,
+        filepath,
+        visited_at: new Date().toISOString(),
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Error creating point:', error);
+      return null;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error('Error in createPoint:', error);
     return null;
   }
 };

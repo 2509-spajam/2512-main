@@ -21,7 +21,7 @@ function RootLayoutNav() {
       router.replace("/login");
     } else if (user && inAuthGroup) {
       // Redirect back to the home page if authenticated
-      router.replace("/home");
+      router.replace('/');
     }
   }, [user, isLoading, segments]);
 
@@ -51,6 +51,8 @@ function RootLayoutNav() {
             ),
           }}
         />
+        {/* 'home' removed as it duplicates index functionality */}
+
         <Tabs.Screen
           name="post"
           options={{
@@ -78,6 +80,13 @@ function RootLayoutNav() {
           }}
         />
         {/* Hidden Tabs (Screens) */}
+        <Tabs.Screen
+          name="welcome"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
         <Tabs.Screen
           name="login"
           options={{
@@ -129,22 +138,9 @@ function RootLayoutNav() {
             tabBarStyle: { display: "none" },
           }}
         />
-        <Tabs.Screen
-          name="welcome"
-          options={{
-            href: null,
-            tabBarStyle: { display: "none" },
-          }}
-        />
-        <Tabs.Screen
-          name="timeline"
-          options={{
-            href: null,
-            tabBarStyle: { display: "none" },
-          }}
-        />
+        {/* Hidden timeline page if it still exists */}
       </Tabs>
-    </ScreenWrapper>
+    </ScreenWrapper >
   );
 }
 
