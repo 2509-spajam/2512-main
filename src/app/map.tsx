@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MapViewComponent } from '../src/components/MapView';
-import { mockRoutes } from '../src/data/mockData';
-import { TravelRoute, CompletedSpot } from '../src/types';
+import { MapViewComponent } from '../components/MapView';
+import { mockRoutes } from '../data/mockData';
+import { TravelRoute, CompletedSpot } from '../types';
 
 const COMPLETED_SPOTS_KEY = 'completedSpots';
 

@@ -167,7 +167,7 @@ export function CameraView({
                 style={[
                   styles.sliderThumb,
                   { bottom: `${opacity * 100}%` },
-                  { marginBottom: -10 } 
+                  { marginBottom: -10 }
                 ]}
               />
             </View>
