@@ -36,6 +36,13 @@ export function CameraView({
   const cameraRef = useRef<ExpoCameraView>(null);
   const currentSpot = route.spots[currentSpotIndex];
 
+  const opacityRef = useRef(opacity);
+  const startOpacityRef = useRef(opacity);
+
+  useEffect(() => {
+    opacityRef.current = opacity;
+  }, [opacity]);
+
   useEffect(() => {
     if (!permission?.granted) {
       requestPermission();
@@ -46,20 +53,17 @@ export function CameraView({
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) => {
-        updateOpacityFromGesture(evt.nativeEvent.locationY);
+      onPanResponderGrant: () => {
+        startOpacityRef.current = opacityRef.current;
       },
-      onPanResponderMove: (evt) => {
-        updateOpacityFromGesture(evt.nativeEvent.locationY);
+      onPanResponderMove: (_evt, gestureState) => {
+        const moveRatio = -gestureState.dy / SLIDER_HEIGHT;
+        let newOpacity = startOpacityRef.current + moveRatio;
+        newOpacity = Math.max(0, Math.min(1, newOpacity));
+        setOpacity(newOpacity);
       },
     })
   ).current;
-
-  const updateOpacityFromGesture = (y: number) => {
-    let newOpacity = 1 - y / SLIDER_HEIGHT;
-    newOpacity = Math.max(0, Math.min(1, newOpacity));
-    setOpacity(newOpacity);
-  };
 
   const handleCapture = async () => {
     if (!cameraRef.current) return;
@@ -104,7 +108,10 @@ export function CameraView({
         facing="back"
       >
         {showGuide && (
-          <View style={[styles.guideOverlay, { opacity }]}>
+          <View 
+            style={[styles.guideOverlay, { opacity }]}
+            pointerEvents="none"
+          >
             <Image
               source={{ uri: currentSpot.imageUrl }}
               style={styles.guideImage}
@@ -167,8 +174,9 @@ export function CameraView({
                 style={[
                   styles.sliderThumb,
                   { bottom: `${opacity * 100}%` },
-                  { marginBottom: -10 }
+                  { marginBottom: -10 } 
                 ]}
+                pointerEvents="none" 
               />
             </View>
             <Entypo name="light-down" size={24} color="#FFFFFF" />
@@ -254,6 +262,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1, 
+    elevation: 1, 
   },
   guideImage: {
     width: '100%',
@@ -267,6 +277,8 @@ const styles = StyleSheet.create({
     paddingTop: 44,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    zIndex: 20, 
+    elevation: 20,
   },
   topBar: {
     flexDirection: 'row',
@@ -334,7 +346,8 @@ const styles = StyleSheet.create({
     left: 16,
     top: '50%',
     transform: [{ translateY: -100 }],
-    zIndex: 10,
+    zIndex: 100, 
+    elevation: 100, 
   },
   opacityControlContainer: {
     alignItems: 'center',
@@ -383,6 +396,8 @@ const styles = StyleSheet.create({
     paddingBottom: 44,
     paddingTop: 24,
     paddingHorizontal: 16,
+    zIndex: 20,
+    elevation: 20,
   },
   bottomControls: {
     flexDirection: 'row',
