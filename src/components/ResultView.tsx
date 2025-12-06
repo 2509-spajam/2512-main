@@ -164,13 +164,20 @@ export function ResultView({
                   <View>
                     <Text style={styles.spotResultName}>{spot.name}</Text>
                     <Text style={styles.spotResultTime}>
-                      {new Date(completed.timestamp).toLocaleTimeString(
-                        "ja-JP",
-                        {
+                      {new Date(completed.timestamp)
+                        .toLocaleString("ja-JP", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
                           hour: "2-digit",
                           minute: "2-digit",
-                        }
-                      )}
+                          hour12: false,
+                        })
+                        .replace(/\//g, "-")
+                        .replace(
+                          /(\d{4})-(\d{2})-(\d{2}), (\d{2}):(\d{2})/,
+                          "$1-$2-$3 $4:$5"
+                        )}
                     </Text>
                   </View>
                   <View style={styles.spotResultScore}>
