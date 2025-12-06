@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { TravelRoute, CompletedSpot } from '../types';
-import { LinearGradient } from 'expo-linear-gradient';
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { TravelRoute, CompletedSpot } from "../types";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface ResultViewProps {
   route: TravelRoute;
@@ -18,23 +18,47 @@ interface ResultViewProps {
   onBack: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
   const averageSyncRate =
     completedSpots.reduce((sum, spot) => sum + spot.syncRate, 0) /
     completedSpots.length;
 
+  const [animatedValue, setAnimatedValue] = useState(0);
+
+  useEffect(() => {
+    setAnimatedValue(0);
+
+    const duration = 1500;
+    const steps = 60;
+    const increment = averageSyncRate / steps;
+    const interval = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        setAnimatedValue(averageSyncRate);
+        clearInterval(timer);
+      } else {
+        setAnimatedValue(increment * currentStep);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [averageSyncRate, completedSpots.length]);
+
   const getRankMessage = (rate: number) => {
     if (rate >= 95)
-      return { rank: 'S', message: '完璧なシンクロ！', color: '#FBBF24' };
+      return { rank: "S", message: "完璧なシンクロ！", color: "#FBBF24" };
     if (rate >= 85)
-      return { rank: 'A', message: '素晴らしい！', color: '#3B82F6' };
+      return { rank: "A", message: "素晴らしい！", color: "#3B82F6" };
     if (rate >= 75)
-      return { rank: 'B', message: 'よくできました！', color: '#10B981' };
+      return { rank: "B", message: "よくできました！", color: "#10B981" };
     if (rate >= 60)
-      return { rank: 'C', message: 'もう少し！', color: '#F97316' };
-    return { rank: 'D', message: '再チャレンジ！', color: '#6B7280' };
+      return { rank: "C", message: "もう少し！", color: "#F97316" };
+    return { rank: "D", message: "再チャレンジ！", color: "#6B7280" };
   };
 
   const result = getRankMessage(averageSyncRate);
@@ -51,10 +75,7 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.scoreCard}>
           <View style={styles.trophyIcon}>
             <Feather name="award" size={48} color={result.color} />
@@ -64,7 +85,7 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
 
           <View style={styles.scoreContainer}>
             <Text style={styles.scoreValue}>
-              {averageSyncRate.toFixed(1)}
+              {animatedValue.toFixed(1)}
               <Text style={styles.scoreUnit}>%</Text>
             </Text>
             <Text style={[styles.rankText, { color: result.color }]}>
@@ -78,7 +99,7 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
             {averageSyncRate >= 90 && (
               <View style={styles.badge}>
                 <LinearGradient
-                  colors={['#FBBF24', '#F59E0B']}
+                  colors={["#FBBF24", "#F59E0B"]}
                   style={styles.badgeIcon}
                 >
                   <Feather name="star" size={32} color="#FFFFFF" />
@@ -89,7 +110,7 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
             {completedSpots.length === route.spots.length && (
               <View style={styles.badge}>
                 <LinearGradient
-                  colors={['#3B82F6', '#2563EB']}
+                  colors={["#3B82F6", "#2563EB"]}
                   style={styles.badgeIcon}
                 >
                   <Feather name="map-pin" size={32} color="#FFFFFF" />
@@ -136,10 +157,10 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
                     <Text style={styles.spotResultName}>{spot.name}</Text>
                     <Text style={styles.spotResultTime}>
                       {new Date(completed.timestamp).toLocaleTimeString(
-                        'ja-JP',
+                        "ja-JP",
                         {
-                          hour: '2-digit',
-                          minute: '2-digit',
+                          hour: "2-digit",
+                          minute: "2-digit",
                         }
                       )}
                     </Text>
@@ -164,12 +185,9 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.shareButtonLarge}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.shareButtonLarge} activeOpacity={0.8}>
             <LinearGradient
-              colors={['#2563EB', '#3B82F6']}
+              colors={["#2563EB", "#3B82F6"]}
               style={styles.shareButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -193,25 +211,25 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F9FF',
+    backgroundColor: "#F0F9FF",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-    backgroundColor: '#FFFFFF',
+    borderBottomColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
   },
   shareButton: {
     padding: 8,
@@ -220,12 +238,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scoreCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 32,
     margin: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -235,90 +253,90 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FEF3C7',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#FEF3C7",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 16,
   },
   completionText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: "bold",
+    color: "#1F2937",
     marginBottom: 8,
   },
   routeTitle: {
     fontSize: 14,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 24,
   },
   scoreContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
   scoreValue: {
     fontSize: 64,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    fontVariant: ['tabular-nums'],
+    fontWeight: "bold",
+    color: "#1F2937",
+    fontVariant: ["tabular-nums"],
   },
   scoreUnit: {
     fontSize: 32,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   rankText: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 8,
   },
   messageText: {
     fontSize: 18,
-    color: '#374151',
+    color: "#374151",
     marginTop: 16,
   },
   badgesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: 24,
     marginTop: 32,
   },
   badge: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   badgeIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 8,
   },
   badgeLabel: {
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   spotsSection: {
     padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
     marginBottom: 16,
     paddingHorizontal: 8,
   },
   spotResultCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
   },
   spotImages: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
     padding: 16,
   },
@@ -327,45 +345,45 @@ const styles = StyleSheet.create({
   },
   imageLabel: {
     fontSize: 12,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 8,
   },
   spotImage: {
-    width: '100%',
+    width: "100%",
     height: 160,
     borderRadius: 8,
   },
   spotResultInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#E5E7EB",
   },
   spotResultName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
     marginBottom: 4,
   },
   spotResultTime: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   spotResultScore: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   spotResultRate: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    fontVariant: ['tabular-nums'],
+    fontWeight: "bold",
+    color: "#1F2937",
+    fontVariant: ["tabular-nums"],
     marginBottom: 4,
   },
   spotResultRank: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   actions: {
     padding: 16,
@@ -373,8 +391,8 @@ const styles = StyleSheet.create({
   },
   shareButtonLarge: {
     borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#2563EB',
+    overflow: "hidden",
+    shadowColor: "#2563EB",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -382,26 +400,26 @@ const styles = StyleSheet.create({
   },
   shareButtonGradient: {
     paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   shareButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   backButtonLarge: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: "#E5E7EB",
     borderRadius: 12,
     paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   backButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: "600",
+    color: "#374151",
   },
 });
