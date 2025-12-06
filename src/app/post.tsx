@@ -21,6 +21,9 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { COLORS } from "../constants/colors";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { createTravel, createPoint, uploadPointImage } from '../services/travelService';
+
 
 const { width } = Dimensions.get("window");
 
@@ -52,6 +55,12 @@ export default function PostScreen() {
   const [searchResults, setSearchResults] = useState<
     Array<{ display_name: string; lat: string; lon: string }>
   >([]);
+
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // debounce: 検索キーワード入力に対して遅延検索を行う
   useEffect(() => {
@@ -218,20 +227,79 @@ export default function PostScreen() {
       Alert.alert("入力エラー", "画像を1枚以上選択してください。");
       return false;
     }
+    // Validate dates
+    if (endDate < startDate) {
+      Alert.alert("入力エラー", "終了日は開始日より後の日付にしてください。");
+      return false;
+    }
+    // Validate image locations
+    for (let i = 0; i < images.length; i++) {
+      if (!imageLocations[i]) {
+        Alert.alert("入力エラー", `画像 ${i + 1} の位置情報を設定してください。`);
+        return false;
+      }
+    }
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
+    if (isSubmitting) return;
 
-    Alert.alert("投稿完了", "ルートを投稿しました。", [
-      {
-        text: "OK",
-        onPress: () => {
-          router.replace("/");
+    setIsSubmitting(true);
+
+    try {
+      const pointIds: string[] = [];
+
+      // Process each image
+      for (let i = 0; i < images.length; i++) {
+        const uri = images[i];
+        const location = imageLocations[i];
+
+        if (!location) continue; // Should be caught by validateForm
+
+        // 1. Upload image
+        const imagePath = await uploadPointImage(uri);
+        if (!imagePath) {
+          throw new Error(`画像 ${i + 1} のアップロードに失敗しました。`);
+        }
+
+        // 2. Create point
+        const pointId = await createPoint(location.latitude, location.longitude, imagePath);
+        if (!pointId) {
+          throw new Error(`地点 ${i + 1} の作成に失敗しました。`);
+        }
+
+        pointIds.push(pointId);
+      }
+
+      // 3. Create Travel
+      const travelId = await createTravel(
+        title,
+        description,
+        startDate.toISOString(),
+        endDate.toISOString(),
+        pointIds
+      );
+
+      if (!travelId) {
+        throw new Error("旅行の作成に失敗しました。");
+      }
+
+      Alert.alert("投稿完了", "ルートを投稿しました。", [
+        {
+          text: "OK",
+          onPress: () => {
+            router.replace("/");
+          },
         },
-      },
-    ]);
+      ]);
+    } catch (error: any) {
+      console.error("Submit error:", error);
+      Alert.alert("エラー", error.message || "投稿中にエラーが発生しました。");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -295,7 +363,55 @@ export default function PostScreen() {
               />
             </View>
 
-            {/* 写真に位置情報が付与されるため、ルート位置選択UIは不要になりました */}
+            <View style={styles.formSection}>
+              <Text style={styles.label}>期間</Text>
+              <View style={styles.dateContainer}>
+                <View style={styles.dateField}>
+                  <Text style={styles.dateLabel}>開始日</Text>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowStartPicker(true)}
+                  >
+                    <Text style={styles.dateText}>{startDate.toLocaleDateString()}</Text>
+                  </TouchableOpacity>
+                  {showStartPicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowStartPicker(false);
+                        if (selectedDate) setStartDate(selectedDate);
+                      }}
+                    />
+                  )}
+                </View>
+                <View style={styles.dateArrow}>
+                  <Feather name="arrow-right" size={20} color="#9CA3AF" />
+                </View>
+                <View style={styles.dateField}>
+                  <Text style={styles.dateLabel}>終了日</Text>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowEndPicker(true)}
+                  >
+                    <Text style={styles.dateText}>{endDate.toLocaleDateString()}</Text>
+                  </TouchableOpacity>
+                  {showEndPicker && (
+                    <DateTimePicker
+                      value={endDate}
+                      mode="date"
+                      display="default"
+                      minimumDate={startDate}
+                      onChange={(event, selectedDate) => {
+                        setShowEndPicker(false);
+                        if (selectedDate) setEndDate(selectedDate);
+                      }}
+                    />
+                  )}
+                </View>
+              </View>
+            </View>
 
             <View style={styles.formSection}>
               <Text style={styles.label}>画像（1枚以上）</Text>
@@ -350,15 +466,15 @@ export default function PostScreen() {
                             style={[
                               styles.locationButtonText,
                               imageLocations[index] &&
-                                styles.locationButtonTextActive,
+                              styles.locationButtonTextActive,
                             ]}
                           >
                             {imageLocations[index]
                               ? `${imageLocations[index].latitude.toFixed(
-                                  4
-                                )}, ${imageLocations[index].longitude.toFixed(
-                                  4
-                                )}`
+                                4
+                              )}, ${imageLocations[index].longitude.toFixed(
+                                4
+                              )}`
                               : "位置を選択"}
                           </Text>
                         </TouchableOpacity>
@@ -382,14 +498,17 @@ export default function PostScreen() {
               )}
             </View>
             <TouchableOpacity
-              style={styles.submitButton}
+              style={[styles.submitButton, isSubmitting && { opacity: 0.7 }]}
               onPress={handleSubmit}
+              disabled={isSubmitting}
             >
               <LinearGradient
                 colors={["#2563EB", "#1D4ED8"]}
                 style={styles.submitButtonGradient}
               >
-                <Text style={styles.submitButtonText}>投稿</Text>
+                <Text style={styles.submitButtonText}>
+                  {isSubmitting ? "送信中..." : "投稿"}
+                </Text>
               </LinearGradient>
             </TouchableOpacity>
           </ScrollView>
@@ -464,17 +583,17 @@ export default function PostScreen() {
             region={
               tempCoord
                 ? {
-                    latitude: tempCoord.latitude,
-                    longitude: tempCoord.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
+                  latitude: tempCoord.latitude,
+                  longitude: tempCoord.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }
                 : {
-                    latitude: 35.6762,
-                    longitude: 139.6503,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  }
+                  latitude: 35.6762,
+                  longitude: 139.6503,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }
             }
             onPress={(e) => setTempCoord(e.nativeEvent.coordinate)}
           >
@@ -691,5 +810,34 @@ const styles = StyleSheet.create({
   },
   searchResultText: {
     color: "#374151",
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+  },
+  dateField: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginBottom: 4,
+  },
+  dateButton: {
+    backgroundColor: '#374151',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#4B5563',
+    alignItems: 'center',
+  },
+  dateText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  dateArrow: {
+    paddingBottom: 12,
   },
 });

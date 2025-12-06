@@ -335,3 +335,39 @@ export const createPoint = async (lat: number, lng: number, filepath: string): P
     return null;
   }
 };
+
+export const createTravel = async (
+  title: string,
+  description: string,
+  startDate: string,
+  endDate: string,
+  pointIds: string[]
+): Promise<string | null> => {
+  try {
+    const userId = await getUserId();
+    if (!userId) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('travels')
+      .insert({
+        user_id: userId,
+        title,
+        description,
+        started_at: startDate,
+        finished_at: endDate,
+        points: pointIds,
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Error creating travel:', error);
+      throw error;
+    }
+
+    return data.id;
+  } catch (error) {
+    console.error('Error in createTravel:', error);
+    return null;
+  }
+};
