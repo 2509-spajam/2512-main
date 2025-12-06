@@ -41,6 +41,7 @@
   },
   "private": true,
   "devDependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "sharp": "^0.34.5"
   }
 }
