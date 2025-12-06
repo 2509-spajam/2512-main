@@ -3,6 +3,7 @@ import { View, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MapViewComponent } from '../components/MapView';
+import { COLORS } from '../constants/colors';
 import { fetchTravelById } from '../services/travelService';
 import { TravelRoute, CompletedSpot } from '../types';
 
@@ -65,8 +66,8 @@ export default function Map() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
+        <ActivityIndicator size="large" color="#03FFD1" />
       </View>
     );
   }

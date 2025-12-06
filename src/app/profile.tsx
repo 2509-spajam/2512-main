@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useAuth } from "../components/AuthContext";
+import { COLORS } from "../constants/colors";
 import { TravelRoute } from "../types";
 import { fetchTravels } from "../services/travelService";
 
@@ -184,14 +185,14 @@ const TabButton = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   container: {
     flex: 1,
-    backgroundColor: "#F0F9FF",
+    backgroundColor: COLORS.BACKGROUND,
   },
   headerContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#192130",
     paddingTop: 10,
     paddingBottom: 24,
     borderBottomWidth: 1,
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#111827",
+    color: "#FFFFFF",
   },
   logoutButton: {
     paddingVertical: 8,
@@ -236,12 +237,12 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 3,
-    borderColor: "#FFFFFF",
+    borderColor: "#192130",
   },
   userName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 4,
   },
   userId: {
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: "row",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#192130",
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     marginBottom: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#192130",
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
   cardDescription: {

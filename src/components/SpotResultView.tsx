@@ -10,6 +10,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { TravelSpot, CompletedSpot } from '../types';
 import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS } from '../constants/colors';
 
 interface SpotResultViewProps {
   spot: TravelSpot;
@@ -120,7 +121,7 @@ export function SpotResultView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0F9FF',
+    backgroundColor: COLORS.BACKGROUND,
   },
   header: {
     backgroundColor: '#FFFFFF',

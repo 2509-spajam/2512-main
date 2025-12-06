@@ -5,6 +5,7 @@ import { Timeline } from "../components/Timeline";
 import { fetchTravels } from "../services/travelService";
 import { TravelRoute } from "../types";
 import { sessionState } from "../lib/session";
+import { COLORS } from "../constants/colors";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export default function HomeScreen() {
       {loading ? (
         <ActivityIndicator
           size="large"
-          color="#007AFF"
+          color="#03FFD1"
           style={{ marginTop: 20 }}
         />
       ) : (
@@ -72,26 +73,29 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: COLORS.BACKGROUND,
   },
   tabContainer: {
     flexDirection: 'row',
     padding: 10,
-    backgroundColor: '#fff',
+    backgroundColor: '#192130',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#374151',
   },
   tab: {
     flex: 1,
     textAlign: 'center',
     paddingVertical: 10,
     fontSize: 16,
-    color: '#666',
+    color: '#9CA3AF',
     fontWeight: '600',
   },
   activeTab: {
-    color: '#007AFF',
+    color: '#03FFD1',
     borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
+    borderBottomColor: '#03FFD1',
   },
 });

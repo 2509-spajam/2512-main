@@ -4,6 +4,7 @@ import { Link, useRouter } from 'expo-router';
 import { useAuth } from '../components/AuthContext';
 import { AuthButton } from '../components/AuthButton';
 import { authService, validateId, validateName, validatePassword } from '../services/authService';
+import { COLORS } from '../constants/colors';
 
 export default function SignupScreen() {
   const [id, setId] = useState('');
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.BACKGROUND,
   },
   title: {
     fontSize: 28,
