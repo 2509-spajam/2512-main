@@ -1,12 +1,12 @@
 import React, { useRef } from "react";
-import { StyleSheet, View, ActivityIndicator, Text } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { useRouter, Redirect } from "expo-router";
 import { Timeline } from "../components/Timeline";
+import { LoadingView } from "../components/LoadingView";
 import { fetchTravels } from "../services/travelService";
 import { TravelRoute } from "../types";
 import { sessionState } from "../lib/session";
 import { COLORS } from "../constants/colors";
-import { FONTS } from "../constants/fonts";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -112,14 +112,7 @@ export default function HomeScreen() {
         </Text>
       </View>
       {loading ? (
-        <View style={styles.loadingContainer}>
-          <View style={styles.progressBarContainer}>
-            <View
-              style={[styles.progressBar, { width: `${loadingProgress}%` }]}
-            />
-          </View>
-          <Text style={styles.progressText}>{loadingProgress.toFixed(0)}%</Text>
-        </View>
+        <LoadingView progress={loadingProgress} />
       ) : (
         <Timeline routes={routes} onRouteSelect={handleRouteSelect} />
       )}
@@ -167,31 +160,5 @@ const styles = StyleSheet.create({
     color: "#03FFD1",
     borderBottomWidth: 2,
     borderBottomColor: "#03FFD1",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    padding: 20,
-  },
-  progressBarContainer: {
-    width: "100%",
-    maxWidth: 300,
-    height: 4,
-    backgroundColor: "#374151",
-    borderRadius: 2,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  progressBar: {
-    height: "100%",
-    backgroundColor: "#03FFD1",
-    borderRadius: 2,
-  },
-  progressText: {
-    fontSize: 16,
-    color: "#03FFD1",
-    fontFamily: FONTS.ORBITRON_BOLD,
   },
 });
