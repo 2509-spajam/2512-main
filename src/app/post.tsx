@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,15 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Modal,
   Image,
   Alert,
   Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
@@ -18,14 +23,72 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import { COLORS } from "../constants/colors";
 
 const { width } = Dimensions.get("window");
-const IMAGE_SIZE = (width - 48) / 3;
 
 export default function PostScreen() {
   const router = useRouter();
+  const mapRef = useRef<any>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  // 各画像に対応する位置情報 (画像と同じインデックスで管理)
+  const [imageLocations, setImageLocations] = useState<
+    ({
+      latitude: number;
+      longitude: number;
+      name?: string;
+    } | null)[]
+  >([]);
+  // 各画像に対応する名前 (画像と同じインデックスで管理)
+  const [imageNames, setImageNames] = useState<string[]>([]);
+  // マップモーダル制御
+  const [mapModalVisible, setMapModalVisible] = useState(false);
+  const [mapTargetIndex, setMapTargetIndex] = useState<number | null>(null);
+  const [tempCoord, setTempCoord] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<
+    Array<{ display_name: string; lat: string; lon: string }>
+  >([]);
 
+  // debounce: 検索キーワード入力に対して遅延検索を行う
+  useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const id = setTimeout(() => {
+      searchPlace();
+    }, 500);
+    return () => clearTimeout(id);
+  }, [searchQuery]);
+
+  // tempCoordが変わったらマップをその位置にアニメーションする
+  useEffect(() => {
+    if (
+      tempCoord &&
+      mapRef.current &&
+      typeof mapRef.current.animateToRegion === "function"
+    ) {
+      try {
+        mapRef.current.animateToRegion(
+          {
+            latitude: tempCoord.latitude,
+            longitude: tempCoord.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          },
+          500
+        );
+      } catch (e) {
+        // 一部環境では animateToRegion が Promise を返すなど差異があるため安全に
+        console.warn("animateToRegion failed", e);
+      }
+    }
+  }, [tempCoord]);
+  // 写真に位置情報が付与されるため、ルートの位置選択は不要
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -49,9 +112,16 @@ export default function PostScreen() {
         quality: 0.8,
       });
 
+      console.log("ImagePicker result:", result);
+
       if (!result.canceled && result.assets) {
         const newImages = result.assets.map((asset) => asset.uri);
+        console.log("Picked URIs:", newImages);
         setImages([...images, ...newImages]);
+        // 画像に対応する位置配列を拡張（初期は null）
+        setImageLocations((prev) => [...prev, ...newImages.map(() => null)]);
+        // 画像に対応する名前配列を拡張（初期は空文字）
+        setImageNames((prev) => [...prev, ...newImages.map(() => "")]);
       }
     } catch (error) {
       console.error("Error picking images:", error);
@@ -61,6 +131,78 @@ export default function PostScreen() {
 
   const handleRemoveImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
+    setImageLocations(imageLocations.filter((_, i) => i !== index));
+    setImageNames(imageNames.filter((_, i) => i !== index));
+  };
+
+  const openMapForImage = (index: number) => {
+    setMapTargetIndex(index);
+    // 初期位置は既存の位置、なければ中心座標
+    const existing = imageLocations[index];
+    setTempCoord(
+      existing
+        ? { latitude: existing.latitude, longitude: existing.longitude }
+        : { latitude: 35.6762, longitude: 139.6503 }
+    );
+    setMapModalVisible(true);
+  };
+
+  const saveImageLocation = () => {
+    if (mapTargetIndex === null || !tempCoord) {
+      setMapModalVisible(false);
+      return;
+    }
+    const newLoc = {
+      latitude: tempCoord.latitude,
+      longitude: tempCoord.longitude,
+      name: imageNames[mapTargetIndex] || "",
+    };
+    setImageLocations((prev) => {
+      const next = [...prev];
+      next[mapTargetIndex] = newLoc;
+      return next;
+    });
+    setMapModalVisible(false);
+  };
+
+  const searchPlace = async (query?: string) => {
+    const q = query !== undefined ? query : searchQuery;
+    if (!q || q.trim().length === 0) return;
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(
+        q
+      )}`;
+      const res = await fetch(url, {
+        headers: {
+          "Accept-Language": "ja",
+          "User-Agent": "2512-main-app",
+        },
+      });
+      const data = await res.json();
+      setSearchResults(data || []);
+    } catch (e) {
+      console.error("Place search error:", e);
+      setSearchResults([]);
+    }
+  };
+
+  const selectSearchResult = (item: {
+    display_name: string;
+    lat: string;
+    lon: string;
+  }) => {
+    const lat = parseFloat(item.lat);
+    const lon = parseFloat(item.lon);
+    setTempCoord({ latitude: lat, longitude: lon });
+    if (mapTargetIndex !== null) {
+      setImageNames((prev) => {
+        const next = [...prev];
+        next[mapTargetIndex] = item.display_name;
+        return next;
+      });
+    }
+    setSearchResults([]);
+    setSearchQuery("");
   };
 
   const validateForm = (): boolean => {
@@ -106,71 +248,240 @@ export default function PostScreen() {
           <View style={styles.headerSpacer} />
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.formSection}>
-            <Text style={styles.label}>タイトル</Text>
-            <TextInput
-              style={styles.titleInput}
-              placeholder="タイトル"
-              placeholderTextColor="#9CA3AF"
-              value={title}
-              onChangeText={setTitle}
-            />
-          </View>
+        <KeyboardAvoidingView
+          style={styles.keyboardAvoidingView}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        >
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
+            <View style={styles.formSection}>
+              <Text style={styles.label}>タイトル</Text>
+              <TextInput
+                style={styles.titleInput}
+                placeholder="タイトル"
+                placeholderTextColor="#9CA3AF"
+                value={title}
+                onChangeText={setTitle}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+                  }, 100);
+                }}
+              />
+            </View>
 
-          <View style={styles.formSection}>
-            <Text style={styles.label}>説明</Text>
-            <TextInput
-              style={styles.descriptionInput}
-              placeholder="説明"
-              placeholderTextColor="#9CA3AF"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-            />
-          </View>
+            <View style={styles.formSection}>
+              <Text style={styles.label}>説明</Text>
+              <TextInput
+                style={styles.descriptionInput}
+                placeholder="説明"
+                placeholderTextColor="#9CA3AF"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={6}
+                textAlignVertical="top"
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollTo({ y: 200, animated: true });
+                  }, 100);
+                }}
+              />
+            </View>
 
-          <View style={styles.formSection}>
-            <Text style={styles.label}>画像（1枚以上）</Text>
+            {/* 写真に位置情報が付与されるため、ルート位置選択UIは不要になりました */}
+
+            <View style={styles.formSection}>
+              <Text style={styles.label}>画像（1枚以上）</Text>
+              <TouchableOpacity
+                style={styles.imagePickerButton}
+                onPress={handlePickImages}
+              >
+                <Feather name="image" size={24} color="#2563EB" />
+                <Text style={styles.imagePickerText}>画像を選択</Text>
+              </TouchableOpacity>
+
+              {images.length > 0 && (
+                <View style={styles.imageCardsContainer}>
+                  {images.map((uri, index) => (
+                    <View key={index} style={styles.imageCard}>
+                      <View style={styles.spotNumber}>
+                        <Text style={styles.spotNumberText}>{index + 1}</Text>
+                      </View>
+                      <View style={styles.spotInfo}>
+                        <TextInput
+                          style={styles.spotNameInput}
+                          placeholder="場所名を入力"
+                          placeholderTextColor="#9CA3AF"
+                          value={imageNames[index] || ""}
+                          onChangeText={(text) => {
+                            setImageNames((prev) => {
+                              const next = [...prev];
+                              next[index] = text;
+                              return next;
+                            });
+                          }}
+                          onFocus={() => {
+                            setTimeout(() => {
+                              scrollViewRef.current?.scrollToEnd({
+                                animated: true,
+                              });
+                            }, 100);
+                          }}
+                        />
+                        <TouchableOpacity
+                          style={styles.locationButton}
+                          onPress={() => openMapForImage(index)}
+                        >
+                          <Feather
+                            name="map-pin"
+                            size={14}
+                            color={
+                              imageLocations[index] ? "#10B981" : "#6B7280"
+                            }
+                          />
+                          <Text
+                            style={[
+                              styles.locationButtonText,
+                              imageLocations[index] &&
+                                styles.locationButtonTextActive,
+                            ]}
+                          >
+                            {imageLocations[index]
+                              ? `${imageLocations[index].latitude.toFixed(
+                                  4
+                                )}, ${imageLocations[index].longitude.toFixed(
+                                  4
+                                )}`
+                              : "位置を選択"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.spotImageContainer}>
+                        <Image
+                          source={{ uri }}
+                          style={styles.spotImage}
+                          resizeMode="cover"
+                        />
+                        <TouchableOpacity
+                          style={styles.removeButton}
+                          onPress={() => handleRemoveImage(index)}
+                        >
+                          <Feather name="x" size={16} color="#FFFFFF" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
             <TouchableOpacity
-              style={styles.imagePickerButton}
-              onPress={handlePickImages}
+              style={styles.submitButton}
+              onPress={handleSubmit}
             >
-              <Feather name="image" size={24} color="#2563EB" />
-              <Text style={styles.imagePickerText}>画像を選択</Text>
+              <LinearGradient
+                colors={["#2563EB", "#1D4ED8"]}
+                style={styles.submitButtonGradient}
+              >
+                <Text style={styles.submitButtonText}>投稿</Text>
+              </LinearGradient>
             </TouchableOpacity>
-
-            {images.length > 0 && (
-              <View style={styles.imageGrid}>
-                {images.map((uri, index) => (
-                  <View key={index} style={styles.imageContainer}>
-                    <Image source={{ uri }} style={styles.image} />
-                    <TouchableOpacity
-                      style={styles.removeButton}
-                      onPress={() => handleRemoveImage(index)}
-                    >
-                      <Feather name="x" size={16} color="#FFFFFF" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-            <LinearGradient
-              colors={["#2563EB", "#1D4ED8"]}
-              style={styles.submitButtonGradient}
-            >
-              <Text style={styles.submitButtonText}>投稿</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
+
+      <Modal
+        visible={mapModalVisible}
+        animationType="slide"
+        onRequestClose={() => setMapModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+          <View
+            style={{
+              height: 56,
+              marginTop: 48,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingHorizontal: 12,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setMapModalVisible(false)}
+              style={{ padding: 8 }}
+            >
+              <Feather name="x" size={24} color="#1F2937" />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 16, fontWeight: "600" }}>位置を選択</Text>
+            <TouchableOpacity
+              onPress={saveImageLocation}
+              style={{ padding: 8 }}
+            >
+              <Text style={{ color: "#2563EB", fontWeight: "600" }}>保存</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* 検索 */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="場所を検索（例: 東京駅）"
+              returnKeyType="search"
+              onSubmitEditing={() => searchPlace()}
+              style={styles.searchInput}
+            />
+          </View>
+
+          {searchResults.length > 0 && (
+            <View style={styles.searchResults}>
+              {searchResults.map((item, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={styles.searchResultItem}
+                  onPress={() => {
+                    selectSearchResult(item);
+                    Keyboard.dismiss();
+                  }}
+                >
+                  <Text style={styles.searchResultText} numberOfLines={2}>
+                    {item.display_name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={{ flex: 1, marginVertical: 48 }}
+            region={
+              tempCoord
+                ? {
+                    latitude: tempCoord.latitude,
+                    longitude: tempCoord.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+                : {
+                    latitude: 35.6762,
+                    longitude: 139.6503,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
+            }
+            onPress={(e) => setTempCoord(e.nativeEvent.coordinate)}
+          >
+            {tempCoord && <Marker coordinate={tempCoord} />}
+          </MapView>
+        </View>
+      </Modal>
     </ScreenWrapper>
   );
 }
@@ -200,6 +511,9 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
   },
   content: {
     flex: 1,
@@ -253,26 +567,72 @@ const styles = StyleSheet.create({
     color: "#2563EB",
     fontWeight: "600",
   },
-  imageGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
+  imageCardsContainer: {
     marginTop: 16,
+    gap: 12,
   },
-  imageContainer: {
+  imageCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    padding: 16,
+  },
+  spotNumber: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#2563EB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  spotNumberText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  spotInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  spotNameInput: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginBottom: 8,
+  },
+  locationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  locationButtonText: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  locationButtonTextActive: {
+    color: "#10B981",
+    fontWeight: "500",
+  },
+  spotImageContainer: {
     position: "relative",
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
   },
-  image: {
-    width: "100%",
-    height: "100%",
+  spotImage: {
+    width: 80,
+    height: 80,
     borderRadius: 8,
   },
   removeButton: {
     position: "absolute",
-    top: 4,
-    right: 4,
+    top: -4,
+    right: -4,
     width: 24,
     height: 24,
     borderRadius: 12,
@@ -287,6 +647,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#192130",
   },
   submitButton: {
+    margin: 16,
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#2563EB",
@@ -304,5 +665,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  searchContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#FFFFFF",
+  },
+  searchInput: {
+    backgroundColor: "#F3F4F6",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  searchResults: {
+    maxHeight: 160,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 12,
+  },
+  searchResultItem: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  searchResultText: {
+    color: "#374151",
   },
 });
