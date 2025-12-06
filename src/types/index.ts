@@ -34,4 +34,5 @@ export interface CompletedSpot {
   userImageUrl?: string;
   syncRate: number;
   timestamp: string;
+  createdPointId?: string;
 }

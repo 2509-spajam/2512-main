@@ -3,7 +3,7 @@ import { View, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraView } from "../components/CameraView";
-import { fetchTravelById } from "../services/travelService";
+import { fetchTravelById, uploadPointImage, createPoint } from "../services/travelService";
 import { TravelRoute, CompletedSpot } from "../types";
 import { compareImages } from "../utils/pHash";
 
@@ -58,6 +58,7 @@ export default function Camera() {
   const handleCapture = async (spotId: string, uri: string) => {
     const spot = route.spots[currentSpotIndex];
     let syncRate = 0;
+    let pointId = '';
 
     try {
       console.log(`Comparing spot image: ${spot.imageUrl} with captured: ${uri}`);
@@ -66,16 +67,45 @@ export default function Camera() {
       const end = Date.now();
       console.log(`Comparison finished in ${end - start}ms. Result: ${percentage}%`);
       syncRate = Math.floor(percentage);
+
+      // --- Backend Integration ---
+      // 1. Upload Image
+      const imagePath = await uploadPointImage(uri);
+
+      if (imagePath) {
+        // 2. Create Point
+        // Note: we just create the point here. We don't link it to a travel yet.
+        // The linking will happen in the Result screen.
+        const pid = await createPoint(spot.lat, spot.lng, imagePath);
+        if (pid) {
+          pointId = pid;
+        }
+      }
+      // ---------------------------
+
     } catch (e) {
-      console.error('Failed to compare images', e);
+      console.error('Failed to process capture', e);
       syncRate = 0;
     }
+
+    // Determine the ID to save locally. 
+    // Ideally we want the Point ID if available, but for now CompletedSpot uses 'spotId' (which is the route's spot ID).
+    // We need to store the *created* point ID to link it later.
+    // Let's check the CompletedSpot type definition again or extend it.
+    // Assuming we can add a property or use 'userImageUrl' to store local URI.
+    // We need to store `pointId` somewhere. 
+    // Let's assume we modify CompletedSpot type or just piggyback.
+    // Wait, the CompletedSpot interface is in types/index.ts. 
+    // I should check if I can add a field to it without breaking things, or if I should just use AsyncStorage differently.
+
+    // For simplicity and minimal changes, let's update CompletedSpot type to include optional `createdPointId`.
 
     const completedSpot: CompletedSpot = {
       spotId,
       syncRate,
       timestamp: new Date().toISOString(),
       userImageUrl: uri,
+      createdPointId: pointId
     };
 
     try {

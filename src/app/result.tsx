@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Text } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ResultView } from '../components/ResultView';
-import { fetchTravelById } from '../services/travelService';
+import { fetchTravelById, saveSynchroTravel } from '../services/travelService';
 import { TravelRoute, CompletedSpot } from '../types';
 
 const COMPLETED_SPOTS_KEY = 'completedSpots';
@@ -14,6 +14,8 @@ export default function Result() {
   const [route, setRoute] = useState<TravelRoute | null>(null);
   const [loading, setLoading] = useState(true);
   const [completedSpots, setCompletedSpots] = useState<CompletedSpot[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const hasSavedRef = React.useRef(false); // To prevent double saving on re-renders
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,7 +31,22 @@ export default function Result() {
           `${COMPLETED_SPOTS_KEY}_${routeId}`
         );
         if (stored) {
-          setCompletedSpots(JSON.parse(stored));
+          const spots: CompletedSpot[] = JSON.parse(stored);
+          setCompletedSpots(spots);
+
+          // Auto-save travel if not already saved
+          if (spots.length > 0 && !hasSavedRef.current) {
+            hasSavedRef.current = true;
+            setIsSaving(true);
+            const pointIds = spots
+              .map(s => s.createdPointId)
+              .filter((id): id is string => !!id);
+
+            if (pointIds.length > 0) {
+              await saveSynchroTravel(routeId, pointIds);
+            }
+            setIsSaving(false);
+          }
         }
       } catch (e) {
         console.error(e);
@@ -46,10 +63,11 @@ export default function Result() {
     }
   }, [loading, route, router]);
 
-  if (loading) {
+  if (loading || isSaving) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#007AFF" />
+        {isSaving && <Text style={{ marginTop: 10, color: '#666' }}>保存中...</Text>}
       </View>
     );
   }
