@@ -33,6 +33,10 @@ npm run ios
 
 # Web
 npm run web
+
+# Tunneling (NGROK)
+# 実機デバッグ時にネットワークの制限がある場合などに使用
+npm run start:tunnel
 ```
 
 ## 技術スタック
