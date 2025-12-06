@@ -3,8 +3,6 @@ import { useRouter } from "expo-router";
 import { Timeline } from "../components/Timeline";
 import { mockRoutes } from "../data/mockData";
 import { TravelRoute } from "../types";
-import { Text, View } from "react-native";
-import ScreenWrapper from "../components/ScreenWrapper";
 
 export default function Index() {
   const router = useRouter();
@@ -16,11 +14,5 @@ export default function Index() {
     });
   };
 
-  return (
-    <ScreenWrapper>
-      <View style={{ flex: 1, padding: 20 }}>
-        <Timeline routes={mockRoutes} onRouteSelect={handleRouteSelect} />;
-      </View>
-    </ScreenWrapper>
-  );
+  return <Timeline routes={mockRoutes} onRouteSelect={handleRouteSelect} />;
 }
