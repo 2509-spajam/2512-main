@@ -42,7 +42,11 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {loading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 20 }} />
+        <ActivityIndicator
+          size="large"
+          color="#007AFF"
+          style={{ marginTop: 20 }}
+        />
       ) : (
         <Timeline routes={routes} onRouteSelect={handleRouteSelect} />
       )}
