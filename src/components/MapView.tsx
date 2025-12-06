@@ -35,6 +35,9 @@ export function MapViewComponent({
     completedSpots.some((completed) => completed.spotId === spot.id)
   );
 
+  const shouldScroll = route.spots.length >= 6;
+  const scrollViewStyle = shouldScroll ? { maxHeight: 300 } : {};
+
   const initialRegion = useMemo(() => {
     if (route.spots.length === 0) {
       return {
@@ -84,6 +87,57 @@ export function MapViewComponent({
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{route.title}</Text>
         <View style={styles.headerSpacer} />
+      </View>
+
+      <View style={styles.legend}>
+        <Text style={styles.legendTitle}>撮影スポット</Text>
+        <ScrollView
+          style={[styles.legendScrollView, scrollViewStyle]} 
+          contentContainerStyle={styles.legendItems}
+          showsVerticalScrollIndicator={shouldScroll}
+          nestedScrollEnabled={true}
+          bounces={shouldScroll} 
+        >
+          {route.spots.map((spot, index) => {
+            const completed = getCompletedSpot(spot.id);
+            return (
+              <TouchableOpacity
+                key={spot.id}
+                style={styles.legendItem}
+                onPress={() => {
+                  setSelectedSpotId(spot.id);
+                  onSpotSelect(spot.id, index);
+                }}
+              >
+                <View
+                  style={[
+                    styles.legendMarker,
+                    completed && {
+                      backgroundColor: getSyncRateColor(completed.syncRate),
+                    },
+                  ]}
+                >
+                  <Text style={styles.legendMarkerNumber}>{index + 1}</Text>
+                </View>
+                <Text style={styles.legendText} numberOfLines={1}>
+                  {spot.name}
+                </Text>
+                {completed && (
+                  <View
+                    style={[
+                      styles.legendSyncRate,
+                      { backgroundColor: getSyncRateColor(completed.syncRate) },
+                    ]}
+                  >
+                    <Text style={styles.legendSyncRateText}>
+                      {completed.syncRate}%
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
       <MapView
@@ -142,57 +196,6 @@ export function MapViewComponent({
           );
         })}
       </MapView>
-
-      <View style={styles.legend}>
-        <Text style={styles.legendTitle}>撮影スポット</Text>
-        <ScrollView
-          style={styles.legendScrollView}
-          contentContainerStyle={styles.legendItems}
-          showsVerticalScrollIndicator={true}
-          nestedScrollEnabled={true}
-          bounces={true}
-        >
-          {route.spots.map((spot, index) => {
-            const completed = getCompletedSpot(spot.id);
-            return (
-              <TouchableOpacity
-                key={spot.id}
-                style={styles.legendItem}
-                onPress={() => {
-                  setSelectedSpotId(spot.id);
-                  onSpotSelect(spot.id, index);
-                }}
-              >
-                <View
-                  style={[
-                    styles.legendMarker,
-                    completed && {
-                      backgroundColor: getSyncRateColor(completed.syncRate),
-                    },
-                  ]}
-                >
-                  <Text style={styles.legendMarkerNumber}>{index + 1}</Text>
-                </View>
-                <Text style={styles.legendText} numberOfLines={1}>
-                  {spot.name}
-                </Text>
-                {completed && (
-                  <View
-                    style={[
-                      styles.legendSyncRate,
-                      { backgroundColor: getSyncRateColor(completed.syncRate) },
-                    ]}
-                  >
-                    <Text style={styles.legendSyncRateText}>
-                      {completed.syncRate}%
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
 
       {isAllCompleted && (
         <View style={styles.resultButtonContainer}>
@@ -296,21 +299,19 @@ const styles = StyleSheet.create({
   },
   legend: {
     backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderBottomWidth: 1, 
+    borderBottomColor: '#E5E7EB',
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 16,
-    maxHeight: 200,
+    paddingBottom: 8,
   },
   legendTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1F2937',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   legendScrollView: {
-    height: 150,
   },
   legendItems: {
     paddingBottom: 8,
