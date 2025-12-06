@@ -18,11 +18,12 @@ interface ResultViewProps {
   route: TravelRoute;
   completedSpots: CompletedSpot[];
   onBack: () => void;
+  onShowOriginal?: () => void;
 }
 
 const { width } = Dimensions.get("window");
 
-export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
+export function ResultView({ route, completedSpots, onBack, onShowOriginal }: ResultViewProps) {
   const averageSyncRate =
     completedSpots.reduce((sum, spot) => sum + spot.syncRate, 0) /
     completedSpots.length;
@@ -197,6 +198,17 @@ export function ResultView({ route, completedSpots, onBack }: ResultViewProps) {
               <Text style={styles.shareButtonText}>結果をシェアする</Text>
             </LinearGradient>
           </TouchableOpacity>
+
+          {onShowOriginal && (
+            <TouchableOpacity
+              style={styles.backButtonLarge}
+              onPress={onShowOriginal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.backButtonText}>お手本を見る</Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             style={styles.backButtonLarge}
             onPress={onBack}
@@ -416,9 +428,9 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.ORBITRON_BOLD,
   },
   backButtonLarge: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#192130",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#374151",
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: "center",
