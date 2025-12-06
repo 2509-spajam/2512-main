@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from 'expo-file-system/legacy';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { CameraView } from "../components/CameraView";
 import { LoadingView } from "../components/LoadingView";
 import {
@@ -70,13 +71,25 @@ export default function Camera() {
 
       const start = Date.now();
 
+
+
+      // OPTIMIZATION: Resize image to avoid OOM
+      const manipulated = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1080 } }], // Resize to 1080px width, maintining aspect ratio
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      const resizedUri = manipulated.uri;
+      console.log(`Image resized: ${uri} -> ${resizedUri}`);
+
       // 1. Upload Image First (Background or concurrent?)
       // We still need to upload it for saving the record.
-      const imagePath = await uploadPointImage(uri);
+      const imagePath = await uploadPointImage(resizedUri);
       if (!imagePath) throw new Error("Image upload failed");
 
       // 2. Prepare Base64 for User Capture (image2)
-      const base64User = await FileSystem.readAsStringAsync(uri, { encoding: 'base64' });
+      // Use resizedUri here as well
+      const base64User = await FileSystem.readAsStringAsync(resizedUri, { encoding: 'base64' });
       const userImageBase64 = `data:image/jpeg;base64,${base64User}`;
 
       // 3. Prepare Base64 for Original Spot Image (image1)
