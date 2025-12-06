@@ -124,7 +124,8 @@ export const fetchTravels = async (type: 'all' | 'original' | 'sync' = 'all'): P
         description: travel.description || '',
         totalDistance: '--- km', // Placeholder, calculation would need lat/lng math
         duration: durationStr,
-        originTravelId: travel.origin_travel_id
+        originTravelId: travel.origin_travel_id,
+        userId: travel.user_id,
       };
     });
 
@@ -223,7 +224,8 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
       description: travel.description || '',
       totalDistance: '--- km',
       duration: durationStr,
-      originTravelId: travel.origin_travel_id
+      originTravelId: travel.origin_travel_id,
+      userId: travel.user_id,
     };
   } catch (error) {
     console.error('Unexpected error in fetchTravelById:', error);

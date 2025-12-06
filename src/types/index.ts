@@ -21,6 +21,7 @@ export interface TravelRoute {
   totalDistance: string;
   duration: string;
   originTravelId?: string;
+  userId: string;
 }
 
 export interface SyncProgress {
