@@ -15,7 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 interface CameraViewProps {
   route: TravelRoute;
   currentSpotIndex: number;
-  onCapture: (spotId: string) => void;
+  onCapture: (spotId: string, uri: string) => void;
   onClose: () => void;
 }
 
@@ -46,7 +46,7 @@ export function CameraView({
     try {
       const photo = await cameraRef.current.takePictureAsync();
       if (photo) {
-        onCapture(currentSpot.id);
+        onCapture(currentSpot.id, photo.uri);
       }
     } catch (error) {
       console.error('Error taking picture:', error);

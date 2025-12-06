@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { StyleSheet } from 'react-native';
 import { Timeline } from './src/components/Timeline';
 import { RouteDetail } from './src/components/RouteDetail';
 import { MapViewComponent } from './src/components/MapView';
@@ -8,6 +9,7 @@ import { SpotResultView } from './src/components/SpotResultView';
 import { ResultView } from './src/components/ResultView';
 import { mockRoutes } from './src/data/mockData';
 import { TravelRoute, CompletedSpot } from './src/types';
+import { compareImages } from './src/utils/pHash';
 
 type View = 'timeline' | 'detail' | 'map' | 'camera' | 'spotResult' | 'result';
 
@@ -34,17 +36,26 @@ export default function App() {
     setCurrentView('camera');
   };
 
-  const handleCapture = (spotId: string) => {
+  const handleCapture = async (spotId: string, uri: string) => {
     if (!selectedRoute) return;
 
-    const syncRate = Math.floor(Math.random() * 30) + 70;
     const spot = selectedRoute.spots[selectedSpotIndex];
+    let syncRate = 0;
+
+    try {
+      const percentage = await compareImages(spot.imageUrl, uri);
+      syncRate = Math.floor(percentage);
+    } catch (e) {
+      console.error('Failed to compare images', e);
+      // Fallback or error handling
+      syncRate = 0;
+    }
 
     const completedSpot: CompletedSpot = {
       spotId,
       syncRate,
       timestamp: new Date().toISOString(),
-      userImageUrl: spot.imageUrl,
+      userImageUrl: uri,
     };
 
     const newCompletedSpots = [
@@ -137,3 +148,5 @@ export default function App() {
     </>
   );
 }
+
+const styles = StyleSheet.create({});
