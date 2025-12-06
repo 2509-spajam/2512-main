@@ -44,10 +44,6 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
                     {route.spots.length} check points
                   </Text>
                 </View>
-                <View style={styles.syncroRate}>
-                  <Text style={styles.syncroRateText}>Syncro Rate</Text>
-                  <Text style={styles.syncroRateTextValue}>75 %</Text>
-                </View>
               </View>
 
               <View style={styles.cardContent}>
@@ -122,21 +118,17 @@ const styles = StyleSheet.create({
   spotBadge: {
     position: "absolute",
     top: 12,
-    right: 12,
+    right: 36,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   spotBadgeText: {
-    fontSize: 14,
+    fontSize: 18,
     fontFamily: FONTS.ORBITRON_BOLD,
-    color: "#ffffff",
-  },
-  syncroRate: {
-    position: "absolute",
-    bottom: 12,
-    right: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   syncroRateText: {
     fontSize: 14,
