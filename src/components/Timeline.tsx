@@ -1,3 +1,4 @@
+// ...existing code...
 import React from 'react';
 import {
   View,
@@ -17,7 +18,7 @@ interface TimelineProps {
 }
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - 48) / 2;
+// const cardWidth = (width - 48) / 2; // 2列用の計算 → 削除/未使用に変更
 
 export function Timeline({ routes, onRouteSelect }: TimelineProps) {
   return (
@@ -102,7 +103,7 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
     </View>
   );
 }
-
+// ...existing code...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -155,13 +156,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    // 2列から1列に変更
+    flexDirection: 'column',
     padding: 16,
-    gap: 16,
+    // gap は環境によって非対応のため使用しない
   },
   card: {
-    width: cardWidth,
+    // 1列表示に合わせて幅を100%に、下マージンで間隔をつくる
+    width: '100%',
+    marginBottom: 16,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     overflow: 'hidden',
@@ -235,11 +238,13 @@ const styles = StyleSheet.create({
   stats: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    // gap を使わない場合は適宜 margin を使って調整可能
+    marginRight: 8,
   },
   statText: {
     fontSize: 13,
     color: '#6B7280',
+    marginLeft: 4,
   },
   distanceText: {
     fontSize: 11,
