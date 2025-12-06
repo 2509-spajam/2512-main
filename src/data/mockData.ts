@@ -12,8 +12,6 @@ export const mockRoutes: TravelRoute[] = [
       "東京タワーを巡る半日コース。様々な角度から東京タワーを撮影できる絶景スポットを厳選しました。",
     totalDistance: "5.2 km",
     duration: "3時間",
-    likes: 1240,
-    syncAttempts: 856,
     createdAt: "2025-11-15",
     spots: [
       {

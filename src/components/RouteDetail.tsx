@@ -117,21 +117,6 @@ export function RouteDetail({ route, onBack, onStartSync }: RouteDetailProps) {
               </View>
             </View>
           </View>
-
-          <View style={styles.metaStats}>
-            <View style={styles.metaStatItem}>
-              <Feather name="heart" size={16} color="#6B7280" />
-              <Text style={styles.metaStatText}>
-                {route.likes.toLocaleString()} いいね
-              </Text>
-            </View>
-            <View style={styles.metaStatItem}>
-              <Feather name="users" size={16} color="#6B7280" />
-              <Text style={styles.metaStatText}>
-                {route.syncAttempts.toLocaleString()} シンクロ
-              </Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.spotsSection}>
