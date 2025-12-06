@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CameraView } from "../components/CameraView";
 import { mockRoutes } from "../data/mockData";
 import { TravelRoute, CompletedSpot } from "../types";
+import { compareImages } from "../utils/pHash";
 
 const COMPLETED_SPOTS_KEY = "completedSpots";
 
@@ -29,15 +30,27 @@ export default function Camera() {
     return null;
   }
 
-  const handleCapture = async (spotId: string) => {
-    const syncRate = Math.floor(Math.random() * 30) + 70;
+  const handleCapture = async (spotId: string, uri: string) => {
     const spot = route.spots[currentSpotIndex];
+    let syncRate = 0;
+
+    try {
+      console.log(`Comparing spot image: ${spot.imageUrl} with captured: ${uri}`);
+      const start = Date.now();
+      const percentage = await compareImages(spot.imageUrl, uri);
+      const end = Date.now();
+      console.log(`Comparison finished in ${end - start}ms. Result: ${percentage}%`);
+      syncRate = Math.floor(percentage);
+    } catch (e) {
+      console.error('Failed to compare images', e);
+      syncRate = 0;
+    }
 
     const completedSpot: CompletedSpot = {
       spotId,
       syncRate,
       timestamp: new Date().toISOString(),
-      userImageUrl: spot.imageUrl,
+      userImageUrl: uri,
     };
 
     try {
