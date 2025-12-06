@@ -3,44 +3,47 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 
 export default function Index() {
-	const router = useRouter();
+  const router = useRouter();
 
-	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>ようこそ</Text>
-			<Pressable
-				style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-				onPress={() => router.push("/timeline")}
-			>
-				<Text style={styles.buttonText}>タイムラインを見る</Text>
-			</Pressable>
-		</View>
-	);
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>ようこそ</Text>
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={() => router.push("/timeline")}
+      >
+        <Text style={styles.buttonText}>タイムラインを見る</Text>
+      </Pressable>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-		padding: 20,
-		backgroundColor: "#fff",
-	},
-	title: {
-		fontSize: 24,
-		marginBottom: 20,
-	},
-	button: {
-		backgroundColor: "#2f6df6",
-		paddingVertical: 12,
-		paddingHorizontal: 20,
-		borderRadius: 8,
-	},
-	buttonPressed: {
-		opacity: 0.85,
-	},
-	buttonText: {
-		color: "#fff",
-		fontSize: 16,
-	},
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: "#2f6df6",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonPressed: {
+    opacity: 0.85,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
 });
