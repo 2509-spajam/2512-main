@@ -6,10 +6,15 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { TravelRoute } from "../types";
 import { COLORS } from "../constants/colors";
 import { FONTS } from "../constants/fonts";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const GRID_PADDING = 16;
+const CARD_IMAGE_WIDTH = SCREEN_WIDTH - GRID_PADDING * 2;
 
 interface TimelineProps {
   routes: TravelRoute[];
@@ -19,12 +24,7 @@ interface TimelineProps {
 export function Timeline({ routes, onRouteSelect }: TimelineProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Photo Quest</Text>
-      </View>
-
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-
         <View style={styles.grid}>
           {routes.map((route) => (
             <TouchableOpacity
@@ -43,10 +43,6 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
                   <Text style={styles.spotBadgeText}>
                     {route.spots.length} check points
                   </Text>
-                </View>
-                <View style={styles.syncroRate}>
-                  <Text style={styles.syncroRateText}>Syncro Rate</Text>
-                  <Text style={styles.syncroRateTextValue}>75 %</Text>
                 </View>
               </View>
 
@@ -85,20 +81,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.BACKGROUND,
   },
-  header: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#313745",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#03FFD1",
-    textShadowColor: "#03FFD1",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
-  },
   subtitle: {
     fontSize: 14,
     color: "#6B7280",
@@ -124,32 +106,29 @@ const styles = StyleSheet.create({
     borderColor: "#313745",
   },
   imageContainer: {
-    width: "100%",
+    width: CARD_IMAGE_WIDTH,
     height: 180,
     position: "relative",
+    overflow: "hidden",
   },
   coverImage: {
-    width: "100%",
-    height: "100%",
+    width: CARD_IMAGE_WIDTH,
+    height: 180,
   },
   spotBadge: {
     position: "absolute",
     top: 12,
-    right: 12,
+    right: 36,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   spotBadgeText: {
-    fontSize: 14,
+    fontSize: 18,
     fontFamily: FONTS.ORBITRON_BOLD,
-    color: "#ffffff",
-  },
-  syncroRate: {
-    position: "absolute",
-    bottom: 12,
-    right: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   syncroRateText: {
     fontSize: 14,
