@@ -1,9 +1,38 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { AuthProvider, useAuth } from "../components/AuthContext";
+import { useEffect } from "react";
+import { View, ActivityIndicator } from "react-native";
 
-export default function RootLayout() {
+function RootLayoutNav() {
+  const { user, isLoading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === 'login' || segments[0] === 'signup';
+
+    if (!user && !inAuthGroup) {
+      // Redirect to the login page if not authenticated
+      router.replace('/login');
+    } else if (user && inAuthGroup) {
+      // Redirect back to the home page if authenticated
+      router.replace('/');
+    }
+  }, [user, isLoading, segments]);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <ScreenWrapper>
       <StatusBar style="auto" />
@@ -55,6 +84,21 @@ export default function RootLayout() {
             ),
           }}
         />
+        {/* Hidden Tabs (Screens) */}
+        <Tabs.Screen
+          name="login"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="signup"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
         <Tabs.Screen
           name="home"
           options={{
@@ -99,5 +143,13 @@ export default function RootLayout() {
         />
       </Tabs>
     </ScreenWrapper>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
   );
 }
