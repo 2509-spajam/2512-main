@@ -1,9 +1,10 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import ScreenWrapper from "../components/ScreenWrapper";
 
 export default function RootLayout() {
   return (
-    <>
+    <ScreenWrapper>
       <StatusBar style="auto" />
       <Stack
         screenOptions={{
@@ -18,6 +19,6 @@ export default function RootLayout() {
         <Stack.Screen name="spot-result" />
         <Stack.Screen name="result" />
       </Stack>
-    </>
+    </ScreenWrapper>
   );
 }
