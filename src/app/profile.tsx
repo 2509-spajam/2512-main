@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,24 @@ import {
   SafeAreaView,
   FlatList,
   ImageSourcePropType,
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
+  ActivityIndicator,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { useAuth } from "../components/AuthContext";
-import { TravelRoute } from '../types';
-import { mockRoutes } from '../data/mockData';
+import { TravelRoute } from "../types";
+import { fetchTravels } from "../services/travelService";
 
-const ProfileHeader = ({ user, onLogout }: { user: any, onLogout: () => void }) => {
-  const defaultAvatar = require('../../assets/neko.png');
-  const avatarSource: ImageSourcePropType = user?.avatarUrl ? { uri: user.avatarUrl } : defaultAvatar;
+const ProfileHeader = ({
+  user,
+  onLogout,
+}: {
+  user: any;
+  onLogout: () => void;
+}) => {
+  const defaultAvatar = require("../../assets/neko.png");
+  const avatarSource: ImageSourcePropType = user?.avatarUrl
+    ? { uri: user.avatarUrl }
+    : defaultAvatar;
 
   return (
     <View style={styles.headerContainer}>
@@ -31,8 +40,8 @@ const ProfileHeader = ({ user, onLogout }: { user: any, onLogout: () => void }) 
         <View style={styles.avatarContainer}>
           <Image source={avatarSource} style={styles.avatarImage} />
         </View>
-        <Text style={styles.userName}>{user?.name || 'Yuki Tanaka'}</Text>
-        <Text style={styles.userId}>ID: {user?.id || 'user_001'}</Text>
+        <Text style={styles.userName}>{user?.name || "Yuki Tanaka"}</Text>
+        <Text style={styles.userId}>ID: {user?.id || "user_001"}</Text>
       </View>
     </View>
   );
@@ -52,22 +61,29 @@ const RouteCard = ({ route }: { route: TravelRoute }) => (
     </View>
 
     <View style={styles.cardContent}>
-      <Text style={styles.cardTitle} numberOfLines={1}>{route.title}</Text>
-      <Text style={styles.cardDescription} numberOfLines={2}>{route.description}</Text>
+      <Text style={styles.cardTitle} numberOfLines={1}>
+        {route.title}
+      </Text>
+      <Text style={styles.cardDescription} numberOfLines={2}>
+        {route.description}
+      </Text>
 
       <View style={styles.authorContainer}>
-        <Image source={{ uri: route.authorAvatar }} style={styles.authorAvatar} />
+        <Image
+          source={{ uri: route.authorAvatar }}
+          style={styles.authorAvatar}
+        />
         <Text style={styles.authorName}>{route.authorName}</Text>
       </View>
 
       <View style={styles.statsContainer}>
         <View style={styles.stats}>
           <Feather name="heart" size={14} color="#6B7280" />
-          <Text style={styles.statText}>{route.likes.toLocaleString()}</Text>
+          <Text style={styles.statText}>{route.likes}</Text>
         </View>
         <View style={styles.stats}>
           <Feather name="users" size={14} color="#6B7280" />
-          <Text style={styles.statText}>{route.syncAttempts.toLocaleString()}</Text>
+          <Text style={styles.statText}>{route.syncAttempts}</Text>
         </View>
         <Text style={styles.distanceText}>
           {route.totalDistance} · {route.duration}
@@ -79,14 +95,31 @@ const RouteCard = ({ route }: { route: TravelRoute }) => (
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'history' | 'myRoutes'>('history');
+  const [activeTab, setActiveTab] = useState<"history" | "myRoutes">("history");
+  const [routes, setRoutes] = useState<TravelRoute[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const myRouteData = mockRoutes.filter(route => route.authorName === 'Yuki Tanaka');
+  useEffect(() => {
+    loadTravels();
+  }, []);
 
-  const otherRoutes = mockRoutes.filter(route => route.authorName !== 'Yuki Tanaka');
-  const historyData = otherRoutes.length > 0 ? [otherRoutes[0]] : [];
+  const loadTravels = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchTravels();
+      setRoutes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const displayRoutes = activeTab === 'history' ? historyData : myRouteData;
+  const myRouteData = routes.filter((route) => route.authorName === user?.name);
+
+  const historyData: TravelRoute[] = [];
+
+  const displayRoutes = activeTab === "history" ? historyData : myRouteData;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -94,37 +127,51 @@ export default function ProfileScreen() {
         <ProfileHeader user={user} onLogout={logout} />
 
         <View style={styles.tabs}>
-          <TabButton 
-            label="過去の履歴" 
-            isActive={activeTab === 'history'} 
-            onPress={() => setActiveTab('history')} 
+          <TabButton
+            label="過去の履歴"
+            isActive={activeTab === "history"}
+            onPress={() => setActiveTab("history")}
           />
-          <TabButton 
-            label="自分のルート" 
-            isActive={activeTab === 'myRoutes'} 
-            onPress={() => setActiveTab('myRoutes')} 
+          <TabButton
+            label="自分のルート"
+            isActive={activeTab === "myRoutes"}
+            onPress={() => setActiveTab("myRoutes")}
           />
         </View>
 
-        <FlatList
-          data={displayRoutes}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <RouteCard route={item} />}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>ルートがありません</Text>
-            </View>
-          }
-        />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#2563EB" />
+          </View>
+        ) : (
+          <FlatList
+            data={displayRoutes}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <RouteCard route={item} />}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>ルートがありません</Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </SafeAreaView>
   );
 }
 
-const TabButton = ({ label, isActive, onPress }: { label: string, isActive: boolean, onPress: () => void }) => (
-  <TouchableOpacity 
+const TabButton = ({
+  label,
+  isActive,
+  onPress,
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
     style={[styles.tab, isActive && styles.tabActive]}
     onPress={onPress}
   >
@@ -137,48 +184,48 @@ const TabButton = ({ label, isActive, onPress }: { label: string, isActive: bool
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
-    backgroundColor: '#F0F9FF',
+    backgroundColor: "#F0F9FF",
   },
   headerContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     paddingTop: 10,
     paddingBottom: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: "#E5E7EB",
   },
   headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
+    fontWeight: "bold",
+    color: "#111827",
   },
   logoutButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#EF4444',
+    backgroundColor: "#EF4444",
   },
   logoutText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   userInfoSection: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   avatarContainer: {
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -189,42 +236,42 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
   },
   userName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1F2937',
+    fontWeight: "bold",
+    color: "#1F2937",
     marginBottom: 4,
   },
   userId: {
     fontSize: 13,
-    color: '#9CA3AF',
+    color: "#9CA3AF",
   },
   tabs: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: "#E5E7EB",
   },
   tab: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 16,
     borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderBottomColor: "transparent",
   },
   tabActive: {
-    borderBottomColor: '#2563EB',
+    borderBottomColor: "#2563EB",
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
+    fontWeight: "600",
+    color: "#6B7280",
   },
   tabTextActive: {
-    color: '#2563EB',
+    color: "#2563EB",
   },
   listContent: {
     padding: 16,
@@ -232,65 +279,71 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     padding: 40,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyText: {
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     fontSize: 14,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 40,
+  },
   card: {
-    width: '100%',
+    width: "100%",
     marginBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
   },
   imageContainer: {
-    width: '100%',
+    width: "100%",
     height: 180,
-    position: 'relative',
+    position: "relative",
   },
   coverImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   spotBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 12,
     right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
   },
   spotBadgeText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
   },
   cardContent: {
     padding: 16,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1F2937',
+    fontWeight: "600",
+    color: "#1F2937",
     marginBottom: 8,
   },
   cardDescription: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginBottom: 12,
     lineHeight: 18,
   },
   authorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
   },
   authorAvatar: {
@@ -301,28 +354,28 @@ const styles = StyleSheet.create({
   },
   authorName: {
     fontSize: 13,
-    color: '#374151',
+    color: "#374151",
   },
   statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#E5E7EB",
   },
   stats: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginRight: 8,
   },
   statText: {
     fontSize: 13,
-    color: '#6B7280',
+    color: "#6B7280",
     marginLeft: 4,
   },
   distanceText: {
     fontSize: 11,
-    color: '#6B7280',
+    color: "#6B7280",
   },
 });

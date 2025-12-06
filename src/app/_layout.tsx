@@ -14,20 +14,20 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === 'login' || segments[0] === 'signup';
+    const inAuthGroup = segments[0] === "login" || segments[0] === "signup";
 
     if (!user && !inAuthGroup) {
       // Redirect to the login page if not authenticated
-      router.replace('/login');
+      router.replace("/login");
     } else if (user && inAuthGroup) {
       // Redirect back to the home page if authenticated
-      router.replace('/home');
+      router.replace("/home");
     }
   }, [user, isLoading, segments]);
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -44,13 +44,6 @@ function RootLayoutNav() {
       >
         <Tabs.Screen
           name="index"
-          options={{
-            href: null,
-            tabBarStyle: { display: "none" },
-          }}
-        />
-        <Tabs.Screen
-          name="home"
           options={{
             title: "ホーム",
             tabBarIcon: ({ color, size }) => (
@@ -131,6 +124,20 @@ function RootLayoutNav() {
         />
         <Tabs.Screen
           name="result"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="welcome"
+          options={{
+            href: null,
+            tabBarStyle: { display: "none" },
+          }}
+        />
+        <Tabs.Screen
+          name="timeline"
           options={{
             href: null,
             tabBarStyle: { display: "none" },
