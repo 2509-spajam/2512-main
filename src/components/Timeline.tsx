@@ -24,8 +24,8 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Travel Synchro</Text>
-        <Text style={styles.subtitle}>他人の旅行とシンクロしよう</Text>
+        <Text style={styles.title}>未定</Text>
+        <Text style={styles.subtitle}>未定</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
