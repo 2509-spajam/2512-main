@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  PanResponder,
 } from 'react-native';
 import { CameraView as ExpoCameraView, useCameraPermissions } from 'expo-camera';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Entypo } from '@expo/vector-icons';
 import { TravelRoute } from '../types';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -20,6 +21,7 @@ interface CameraViewProps {
 }
 
 const { width, height } = Dimensions.get('window');
+const SLIDER_HEIGHT = 200;
 
 export function CameraView({
   route,
@@ -39,6 +41,25 @@ export function CameraView({
       requestPermission();
     }
   }, [permission, requestPermission]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt) => {
+        updateOpacityFromGesture(evt.nativeEvent.locationY);
+      },
+      onPanResponderMove: (evt) => {
+        updateOpacityFromGesture(evt.nativeEvent.locationY);
+      },
+    })
+  ).current;
+
+  const updateOpacityFromGesture = (y: number) => {
+    let newOpacity = 1 - y / SLIDER_HEIGHT;
+    newOpacity = Math.max(0, Math.min(1, newOpacity));
+    setOpacity(newOpacity);
+  };
 
   const handleCapture = async () => {
     if (!cameraRef.current) return;
@@ -129,8 +150,11 @@ export function CameraView({
 
         <View style={styles.opacityControl}>
           <View style={styles.opacityControlContainer}>
-            <Feather name="sliders" size={20} color="#FFFFFF" />
-            <View style={styles.sliderContainer}>
+            <Entypo name="light-up" size={24} color="#FFFFFF" />
+            <View
+              style={styles.sliderContainer}
+              {...panResponder.panHandlers}
+            >
               <View style={styles.sliderTrack}>
                 <View
                   style={[
@@ -143,18 +167,11 @@ export function CameraView({
                 style={[
                   styles.sliderThumb,
                   { bottom: `${opacity * 100}%` },
+                  { marginBottom: -10 }
                 ]}
               />
             </View>
-            <TouchableOpacity
-              style={styles.sliderButton}
-              onPressIn={() => {
-                // Slider interaction would go here
-                // For now, we'll use simple increment/decrement
-              }}
-            >
-              <View style={styles.sliderButtonInner} />
-            </TouchableOpacity>
+            <Entypo name="light-down" size={24} color="#FFFFFF" />
           </View>
         </View>
 
@@ -198,38 +215,6 @@ export function CameraView({
           </Text>
         </LinearGradient>
       </ExpoCameraView>
-
-      <View style={styles.opacitySliderContainer}>
-        <Text style={styles.opacityLabel}>透明度</Text>
-        <View style={styles.horizontalSlider}>
-          <View style={styles.horizontalSliderTrack}>
-            <View
-              style={[
-                styles.horizontalSliderFill,
-                { width: `${opacity * 100}%` },
-              ]}
-            />
-          </View>
-        </View>
-        <TouchableOpacity
-          style={styles.sliderButtonHorizontal}
-          onPress={() => {
-            const newOpacity = opacity >= 1 ? 0 : opacity + 0.1;
-            setOpacity(Math.min(1, newOpacity));
-          }}
-        >
-          <Text style={styles.sliderButtonText}>+</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.sliderButtonHorizontal}
-          onPress={() => {
-            const newOpacity = opacity <= 0 ? 0 : opacity - 0.1;
-            setOpacity(Math.max(0, newOpacity));
-          }}
-        >
-          <Text style={styles.sliderButtonText}>-</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -349,22 +334,29 @@ const styles = StyleSheet.create({
     left: 16,
     top: '50%',
     transform: [{ translateY: -100 }],
+    zIndex: 10,
   },
   opacityControlContainer: {
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 20,
   },
   sliderContainer: {
-    width: 4,
-    height: 200,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    position: 'relative',
+    width: 30,
+    height: SLIDER_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   sliderTrack: {
-    width: '100%',
+    width: 4,
     height: '100%',
-    position: 'relative',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 2,
+    position: 'absolute',
+    left: 13,
   },
   sliderFill: {
     position: 'absolute',
@@ -379,23 +371,9 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     backgroundColor: '#FFFFFF',
-    left: -8,
+    left: 5,
     borderWidth: 2,
     borderColor: '#3B82F6',
-  },
-  sliderButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sliderButtonInner: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
   },
   bottomGradient: {
     position: 'absolute',
@@ -458,55 +436,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     textAlign: 'center',
-  },
-  opacitySliderContainer: {
-    position: 'absolute',
-    bottom: 120,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 12,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  opacityLabel: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    width: 60,
-  },
-  horizontalSlider: {
-    flex: 1,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    position: 'relative',
-  },
-  horizontalSliderTrack: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  horizontalSliderFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    height: '100%',
-    backgroundColor: '#3B82F6',
-    borderRadius: 2,
-  },
-  sliderButtonHorizontal: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sliderButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
   },
 });
