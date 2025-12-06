@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SpotResultView } from "../src/components/SpotResultView";
-import { mockRoutes } from "../src/data/mockData";
-import { TravelRoute, CompletedSpot } from "../src/types";
+import { SpotResultView } from "../components/SpotResultView";
+import { mockRoutes } from "../data/mockData";
+import { TravelRoute, CompletedSpot } from "../types";
 
 const COMPLETED_SPOTS_KEY = "completedSpots";
 

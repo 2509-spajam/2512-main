@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { RouteDetail } from '../src/components/RouteDetail';
-import { mockRoutes } from '../src/data/mockData';
+import { RouteDetail } from '../components/RouteDetail';
+import { mockRoutes } from '../data/mockData';
 
 export default function Detail() {
   const router = useRouter();
