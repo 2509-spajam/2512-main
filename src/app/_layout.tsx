@@ -166,13 +166,7 @@ function RootLayoutNav() {
             tabBarStyle: { display: "none" },
           }}
         />
-        <Tabs.Screen
-          name="timeline"
-          options={{
-            href: null,
-            tabBarStyle: { display: "none" },
-          }}
-        />
+
       </Tabs>
     </ScreenWrapper >
   );

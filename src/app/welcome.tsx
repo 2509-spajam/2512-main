@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useRouter, Redirect } from "expo-router";
+import { COLORS } from "../constants/colors";
 import { sessionState } from "../lib/session";
 
 export default function Index() {
@@ -37,11 +38,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.BACKGROUND,
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
+    color: "#FFFFFF",
   },
   button: {
     backgroundColor: "#2f6df6",
