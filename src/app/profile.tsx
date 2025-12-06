@@ -96,7 +96,7 @@ const RouteCard = ({ route }: { route: TravelRoute }) => (
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<"history" | "myRoutes">("history");
+  const [activeTab, setActiveTab] = useState<"root" | "sync">("root");
   const [routes, setRoutes] = useState<TravelRoute[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -116,11 +116,11 @@ export default function ProfileScreen() {
     }
   };
 
-  const myRouteData = routes.filter((route) => route.authorName === user?.name);
+  const myRoutes = routes.filter((route) => route.userId === user?.id);
+  const rootRoutes = myRoutes.filter((route) => !route.originTravelId);
+  const syncRoutes = myRoutes.filter((route) => !!route.originTravelId);
 
-  const historyData: TravelRoute[] = [];
-
-  const displayRoutes = activeTab === "history" ? historyData : myRouteData;
+  const displayRoutes = activeTab === "root" ? rootRoutes : syncRoutes;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -129,14 +129,14 @@ export default function ProfileScreen() {
 
         <View style={styles.tabs}>
           <TabButton
-            label="過去の履歴"
-            isActive={activeTab === "history"}
-            onPress={() => setActiveTab("history")}
+            label="ルート"
+            isActive={activeTab === "root"}
+            onPress={() => setActiveTab("root")}
           />
           <TabButton
-            label="自分のルート"
-            isActive={activeTab === "myRoutes"}
-            onPress={() => setActiveTab("myRoutes")}
+            label="シンクロ履歴"
+            isActive={activeTab === "sync"}
+            onPress={() => setActiveTab("sync")}
           />
         </View>
 
