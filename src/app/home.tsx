@@ -1,12 +1,30 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { Timeline } from "../components/Timeline";
-import { mockRoutes } from "../data/mockData";
+import { fetchTravels } from "../services/travelService";
 import { TravelRoute } from "../types";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [routes, setRoutes] = React.useState<TravelRoute[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    loadTravels();
+  }, []);
+
+  const loadTravels = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchTravels();
+      setRoutes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRouteSelect = (route: TravelRoute) => {
     router.push({
@@ -17,7 +35,11 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Timeline routes={mockRoutes} onRouteSelect={handleRouteSelect} />
+      {loading ? (
+        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 20 }} />
+      ) : (
+        <Timeline routes={routes} onRouteSelect={handleRouteSelect} />
+      )}
     </View>
   );
 }
