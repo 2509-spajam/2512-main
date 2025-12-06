@@ -1,76 +1,328 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  SafeAreaView,
+  FlatList,
+  ImageSourcePropType,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from "../components/AuthContext";
+import { TravelRoute } from '../types';
+import { mockRoutes } from '../data/mockData';
 
-export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+const ProfileHeader = ({ user, onLogout }: { user: any, onLogout: () => void }) => {
+  const defaultAvatar = require('../../assets/neko.png');
+  const avatarSource: ImageSourcePropType = user?.avatarUrl ? { uri: user.avatarUrl } : defaultAvatar;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={styles.headerContainer}>
+      <View style={styles.headerTop}>
         <Text style={styles.headerTitle}>プロフィール</Text>
-        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+        <TouchableOpacity onPress={onLogout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>ログアウト</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>ユーザーID</Text>
-          <Text style={styles.value}>{user?.id}</Text>
+      <View style={styles.userInfoSection}>
+        <View style={styles.avatarContainer}>
+          <Image source={avatarSource} style={styles.avatarImage} />
         </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>名前</Text>
-          <Text style={styles.value}>{user?.name}</Text>
-        </View>
+        <Text style={styles.userName}>{user?.name || 'Yuki Tanaka'}</Text>
+        <Text style={styles.userId}>ID: {user?.id || 'user_001'}</Text>
       </View>
     </View>
   );
+};
+
+const RouteCard = ({ route }: { route: TravelRoute }) => (
+  <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+    <View style={styles.imageContainer}>
+      <Image
+        source={{ uri: route.coverImage }}
+        style={styles.coverImage}
+        resizeMode="cover"
+      />
+      <View style={styles.spotBadge}>
+        <Text style={styles.spotBadgeText}>{route.spots.length} スポット</Text>
+      </View>
+    </View>
+
+    <View style={styles.cardContent}>
+      <Text style={styles.cardTitle} numberOfLines={1}>{route.title}</Text>
+      <Text style={styles.cardDescription} numberOfLines={2}>{route.description}</Text>
+
+      <View style={styles.authorContainer}>
+        <Image source={{ uri: route.authorAvatar }} style={styles.authorAvatar} />
+        <Text style={styles.authorName}>{route.authorName}</Text>
+      </View>
+
+      <View style={styles.statsContainer}>
+        <View style={styles.stats}>
+          <Feather name="heart" size={14} color="#6B7280" />
+          <Text style={styles.statText}>{route.likes.toLocaleString()}</Text>
+        </View>
+        <View style={styles.stats}>
+          <Feather name="users" size={14} color="#6B7280" />
+          <Text style={styles.statText}>{route.syncAttempts.toLocaleString()}</Text>
+        </View>
+        <Text style={styles.distanceText}>
+          {route.totalDistance} · {route.duration}
+        </Text>
+      </View>
+    </View>
+  </TouchableOpacity>
+);
+
+export default function ProfileScreen() {
+  const { user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<'history' | 'myRoutes'>('history');
+
+  const myRouteData = mockRoutes.filter(route => route.authorName === 'Yuki Tanaka');
+
+  const otherRoutes = mockRoutes.filter(route => route.authorName !== 'Yuki Tanaka');
+  const historyData = otherRoutes.length > 0 ? [otherRoutes[0]] : [];
+
+  const displayRoutes = activeTab === 'history' ? historyData : myRouteData;
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <ProfileHeader user={user} onLogout={logout} />
+
+        <View style={styles.tabs}>
+          <TabButton 
+            label="過去の履歴" 
+            isActive={activeTab === 'history'} 
+            onPress={() => setActiveTab('history')} 
+          />
+          <TabButton 
+            label="自分のルート" 
+            isActive={activeTab === 'myRoutes'} 
+            onPress={() => setActiveTab('myRoutes')} 
+          />
+        </View>
+
+        <FlatList
+          data={displayRoutes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <RouteCard route={item} />}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>ルートがありません</Text>
+            </View>
+          }
+        />
+      </View>
+    </SafeAreaView>
+  );
 }
 
+const TabButton = ({ label, isActive, onPress }: { label: string, isActive: boolean, onPress: () => void }) => (
+  <TouchableOpacity 
+    style={[styles.tab, isActive && styles.tabActive]}
+    onPress={onPress}
+  >
+    <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+      {label}
+    </Text>
+  </TouchableOpacity>
+);
+
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#F0F9FF',
   },
-  header: {
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingTop: 10,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: 20,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#111827',
   },
   logoutButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: '#ff4444',
+    backgroundColor: '#EF4444',
   },
   logoutText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
   },
-  content: {
-    padding: 20,
+  userInfoSection: {
+    alignItems: 'center',
   },
-  infoRow: {
-    marginBottom: 20,
+  avatarContainer: {
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  label: {
-    fontSize: 14,
-    color: '#888',
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1F2937',
     marginBottom: 4,
   },
-  value: {
-    fontSize: 18,
-    color: '#333',
-    fontWeight: '500',
+  userId: {
+    fontSize: 13,
+    color: '#9CA3AF',
+  },
+  tabs: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: '#2563EB',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  tabTextActive: {
+    color: '#2563EB',
+  },
+  listContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#9CA3AF',
+    fontSize: 14,
+  },
+  card: {
+    width: '100%',
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  imageContainer: {
+    width: '100%',
+    height: 180,
+    position: 'relative',
+  },
+  coverImage: {
+    width: '100%',
+    height: '100%',
+  },
+  spotBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  spotBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  cardContent: {
+    padding: 16,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  cardDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  authorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  authorAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  authorName: {
+    fontSize: 13,
+    color: '#374151',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  stats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  statText: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginLeft: 4,
+  },
+  distanceText: {
+    fontSize: 11,
+    color: '#6B7280',
   },
 });
