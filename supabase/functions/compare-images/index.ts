@@ -43,7 +43,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a judge for a photo travel game. Compare the user's photo with the original spot photo. Provide a similarity score from 0 to 100 based on location accuracy, composition, and key landmarks. Be generous with weather/lighting differences. Return ONLY a JSON object with keys 'score' (number) and 'reason' (string)."
+            content: "You are a judge for a photo travel game. Compare the user's photo with the original spot photo. Evaluate based on: 1. Location (Is it the same place?), 2. Angle/Composition, 3. Lighting/Brightness, 4. Season/Atmosphere. Be lenient with temporary factors (weather, lighting, season) if the location and angle are correct. Provide a score (0-100). Return ONLY a JSON object with keys 'score' (number) and 'reason' (string). The 'reason' must be in Japanese, explaining what matches and what differs."
           },
           {
             role: "user",
@@ -70,6 +70,8 @@ serve(async (req) => {
 
     const data = await response.json()
     const content = JSON.parse(data.choices[0].message.content)
+    console.log(`[OpenAI] Result:`, JSON.stringify(content));
+
 
     return new Response(JSON.stringify(content), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
