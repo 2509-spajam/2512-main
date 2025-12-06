@@ -43,7 +43,11 @@ export default function App() {
     let syncRate = 0;
 
     try {
+      console.log(`Comparing spot image: ${spot.imageUrl} with captured: ${uri}`);
+      const start = Date.now();
       const percentage = await compareImages(spot.imageUrl, uri);
+      const end = Date.now();
+      console.log(`Comparison finished in ${end - start}ms. Result: ${percentage}%`);
       syncRate = Math.floor(percentage);
     } catch (e) {
       console.error('Failed to compare images', e);
