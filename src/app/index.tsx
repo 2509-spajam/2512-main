@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = React.useState(true);
   const [loadingProgress, setLoadingProgress] = React.useState(0);
   const progressRef = useRef(0);
-  const animationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const animationTimerRef = React.useRef<any>(null);
   const [activeTab, setActiveTab] = React.useState<"original" | "sync">(
     "original"
   );

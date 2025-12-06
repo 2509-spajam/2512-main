@@ -13,7 +13,7 @@ export const LoadingView: React.FC<LoadingViewProps> = ({
 }) => {
   const [loadingProgress, setLoadingProgress] = React.useState(0);
   const progressRef = React.useRef(0);
-  const animationTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const animationTimerRef = React.useRef<any>(null);
 
   React.useEffect(() => {
     if (progress !== undefined) {
