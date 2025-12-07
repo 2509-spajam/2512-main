@@ -1,3 +1,4 @@
+import "../utils/ignoreWarnings";
 import { Tabs, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";

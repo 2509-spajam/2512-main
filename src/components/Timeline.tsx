@@ -11,6 +11,7 @@ import {
 import { TravelRoute } from "../types";
 import { COLORS } from "../constants/colors";
 import { FONTS } from "../constants/fonts";
+import { Feather } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const GRID_PADDING = 16;
@@ -63,9 +64,11 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
                 </View>
 
                 <View style={styles.statsContainer}>
-                  <Text style={styles.distanceText}>
-                    {route.totalDistance} · {route.duration}
-                  </Text>
+                  {/* Likes removed as per user request */}
+                  <View style={styles.stats}>
+                    <Feather name="users" size={14} color="#6B7280" />
+                    <Text style={styles.statText}>{route.syncAttempts}</Text>
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>

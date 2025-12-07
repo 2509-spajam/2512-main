@@ -88,9 +88,12 @@ const RouteCard = ({
       </View>
 
       <View style={styles.statsContainer}>
-        <Text style={styles.distanceText}>
-          {route.totalDistance} · {route.duration}
-        </Text>
+        {/* Likes removed */}
+        <View style={styles.stats}>
+          <Feather name="users" size={14} color="#6B7280" />
+          <Text style={styles.statText}>{route.syncAttempts}</Text>
+        </View>
+
       </View>
     </View>
   </TouchableOpacity>
