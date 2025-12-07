@@ -82,7 +82,7 @@ export function RouteDetail({
             <Text style={styles.imageTitle}>{route.title}</Text>
             <View style={styles.authorInfo}>
               <Image
-                source={{ uri: route.authorAvatar }}
+                source={require("../../assets/neko.png")}
                 style={styles.authorAvatarLarge}
               />
               <Text style={styles.authorNameLarge}>{route.authorName}</Text>

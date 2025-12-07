@@ -81,7 +81,7 @@ const RouteCard = ({
 
       <View style={styles.authorContainer}>
         <Image
-          source={{ uri: route.authorAvatar }}
+          source={require("../../assets/neko.png")}
           style={styles.authorAvatar}
         />
         <Text style={styles.authorName}>{route.authorName}</Text>
