@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,14 @@ import {
   Image,
   Dimensions,
   PanResponder,
-} from 'react-native';
-import { CameraView as ExpoCameraView, useCameraPermissions } from 'expo-camera';
-import { Feather, Entypo } from '@expo/vector-icons';
-import { TravelRoute } from '../types';
-import { LinearGradient } from 'expo-linear-gradient';
+} from "react-native";
+import {
+  CameraView as ExpoCameraView,
+  useCameraPermissions,
+} from "expo-camera";
+import { Feather, Entypo } from "@expo/vector-icons";
+import { TravelRoute } from "../types";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface CameraViewProps {
   route: TravelRoute;
@@ -20,7 +23,7 @@ interface CameraViewProps {
   onClose: () => void;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 const SLIDER_HEIGHT = 200;
 
 export function CameraView({
@@ -74,7 +77,7 @@ export function CameraView({
         onCapture(currentSpot.id, photo.uri);
       }
     } catch (error) {
-      console.error('Error taking picture:', error);
+      console.error("Error taking picture:", error);
     }
   };
 
@@ -102,16 +105,9 @@ export function CameraView({
 
   return (
     <View style={styles.container}>
-      <ExpoCameraView
-        ref={cameraRef}
-        style={styles.camera}
-        facing="back"
-      >
+      <ExpoCameraView ref={cameraRef} style={styles.camera} facing="back">
         {showGuide && (
-          <View 
-            style={[styles.guideOverlay, { opacity }]}
-            pointerEvents="none"
-          >
+          <View style={[styles.guideOverlay, { opacity }]} pointerEvents="none">
             <Image
               source={{ uri: currentSpot.imageUrl }}
               style={styles.guideImage}
@@ -121,14 +117,11 @@ export function CameraView({
         )}
 
         <LinearGradient
-          colors={['rgba(0,0,0,0.6)', 'transparent']}
+          colors={["rgba(0,0,0,0.6)", "transparent"]}
           style={styles.topGradient}
         >
           <View style={styles.topBar}>
-            <TouchableOpacity
-              onPress={onClose}
-              style={styles.closeButton}
-            >
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Feather name="x" size={24} color="#FFFFFF" />
             </TouchableOpacity>
             <View style={styles.counterBadge}>
@@ -158,25 +151,19 @@ export function CameraView({
         <View style={styles.opacityControl}>
           <View style={styles.opacityControlContainer}>
             <Entypo name="light-up" size={24} color="#FFFFFF" />
-            <View
-              style={styles.sliderContainer}
-              {...panResponder.panHandlers}
-            >
+            <View style={styles.sliderContainer} {...panResponder.panHandlers}>
               <View style={styles.sliderTrack}>
                 <View
-                  style={[
-                    styles.sliderFill,
-                    { height: `${opacity * 100}%` },
-                  ]}
+                  style={[styles.sliderFill, { height: `${opacity * 100}%` }]}
                 />
               </View>
               <View
                 style={[
                   styles.sliderThumb,
                   { bottom: `${opacity * 100}%` },
-                  { marginBottom: -10 } 
+                  { marginBottom: -10 },
                 ]}
-                pointerEvents="none" 
+                pointerEvents="none"
               />
             </View>
             <Entypo name="light-down" size={24} color="#FFFFFF" />
@@ -184,7 +171,7 @@ export function CameraView({
         </View>
 
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.6)']}
+          colors={["transparent", "rgba(0,0,0,0.6)"]}
           style={styles.bottomGradient}
         >
           <View style={styles.bottomControls}>
@@ -201,7 +188,7 @@ export function CameraView({
                   showGuide && styles.guideToggleTextActive,
                 ]}
               >
-                ガイド {showGuide ? 'ON' : 'OFF'}
+                ガイド {showGuide ? "ON" : "OFF"}
               </Text>
             </TouchableOpacity>
 
@@ -211,16 +198,14 @@ export function CameraView({
               activeOpacity={0.8}
             >
               <View style={styles.captureButtonInner}>
-                <Feather name="camera" size={32} color="#2563EB" />
+                <Feather name="camera" size={32} color="#03FFD1" />
               </View>
             </TouchableOpacity>
 
             <View style={styles.bottomSpacer} />
           </View>
 
-          <Text style={styles.hintText}>
-            元の写真に合わせて撮影しましょう
-          </Text>
+          <Text style={styles.hintText}>元の写真に合わせて撮影しましょう</Text>
         </LinearGradient>
       </ExpoCameraView>
     </View>
@@ -230,129 +215,129 @@ export function CameraView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
   },
   camera: {
     flex: 1,
   },
   loadingText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 100,
   },
   permissionButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: "#2563EB",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   permissionButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   guideOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1, 
-    elevation: 1, 
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+    elevation: 1,
   },
   guideImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   topGradient: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     paddingTop: 44,
     paddingBottom: 16,
     paddingHorizontal: 16,
-    zIndex: 20, 
+    zIndex: 20,
     elevation: 20,
   },
   topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   counterBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   counterText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   spotInfoCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 16,
     padding: 16,
   },
   spotInfoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   spotName: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: "600",
+    color: "#FFFFFF",
     flex: 1,
   },
   distanceBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   distanceText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 13,
   },
   spotLocation: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
     opacity: 0.9,
   },
   spotLocationText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 12,
   },
   opacityControl: {
-    position: 'absolute',
+    position: "absolute",
     left: 16,
-    top: '50%',
+    top: "50%",
     transform: [{ translateY: -100 }],
-    zIndex: 100, 
-    elevation: 100, 
+    zIndex: 100,
+    elevation: 100,
   },
   opacityControlContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: "rgba(0,0,0,0.3)",
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderRadius: 20,
@@ -360,36 +345,36 @@ const styles = StyleSheet.create({
   sliderContainer: {
     width: 30,
     height: SLIDER_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   sliderTrack: {
     width: 4,
-    height: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    height: "100%",
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 2,
-    position: 'absolute',
+    position: "absolute",
     left: 13,
   },
   sliderFill: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
-    width: '100%',
-    backgroundColor: '#3B82F6',
+    width: "100%",
+    backgroundColor: "#03FFD1",
     borderRadius: 2,
   },
   sliderThumb: {
-    position: 'absolute',
+    position: "absolute",
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     left: 5,
     borderWidth: 2,
-    borderColor: '#3B82F6',
+    borderColor: "#03FFD1",
   },
   bottomGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -400,56 +385,56 @@ const styles = StyleSheet.create({
     elevation: 20,
   },
   bottomControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   guideToggle: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   guideToggleActive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   guideToggleText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   guideToggleTextActive: {
-    color: '#000000',
+    color: "#000000",
   },
   captureButton: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#000",
     borderWidth: 4,
-    borderColor: '#3B82F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    borderColor: "#03FFD1",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   captureButtonInner: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   bottomSpacer: {
     width: 80,
   },
   hintText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 13,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

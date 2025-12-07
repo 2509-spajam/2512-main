@@ -50,7 +50,7 @@ export function SpotResultView({
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.scoreCard}>
           <View style={styles.trophyIcon}>
-            <Feather name="award" size={40} color={result.color} />
+            <Feather name="award" size={48} color={result.color} />
           </View>
           <Text style={styles.spotName}>{spot.name}</Text>
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   header: {
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#313745",
     paddingTop: 44,
     paddingBottom: 16,
     paddingHorizontal: 16,
@@ -157,11 +157,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   scoreCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 24,
+    backgroundColor: "#374151",
+    borderRadius: 24,
+    padding: 32,
+    margin: 16,
     alignItems: "center",
-    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -169,43 +169,52 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   trophyIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: "#FEF3C7",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   spotName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#FFFFFF",
     marginBottom: 16,
   },
   scoreContainer: {
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   scoreValue: {
-    fontSize: 56,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontSize: 64,
+    color: "#03FFD1",
     fontVariant: ["tabular-nums"],
+    fontFamily: FONTS.ORBITRON_BOLD,
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+    marginLeft: 16,
   },
   scoreUnit: {
-    fontSize: 28,
-    color: "#6B7280",
+    fontSize: 32,
+    color: "#03FFD1",
+    fontFamily: FONTS.ORBITRON_BOLD,
+    marginLeft: 12,
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   rankText: {
-    fontSize: 40,
-    fontWeight: "bold",
+    fontSize: 48,
     marginTop: 8,
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   messageText: {
-    fontSize: 16,
-    color: "#374151",
-    marginTop: 12,
+    fontSize: 18,
+    color: "#FFFFFF",
+    marginTop: 16,
   },
   comparisonContainer: {
     flexDirection: "row",
@@ -217,7 +226,7 @@ const styles = StyleSheet.create({
   },
   imageLabel: {
     fontSize: 12,
-    color: "#6B7280",
+    color: "#FFFFFF",
     marginBottom: 8,
   },
   comparisonImage: {
