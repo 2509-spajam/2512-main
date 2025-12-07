@@ -159,18 +159,14 @@ export function RouteDetail({
               styles.startButton,
               {
                 marginBottom: 12,
-                backgroundColor: "#fff",
-                borderWidth: 1,
-                borderColor: "#2563EB",
+                backgroundColor: "#03FFD1",
               },
             ]}
             onPress={onShowOriginal}
             activeOpacity={0.8}
           >
             <View style={styles.startButtonGradient}>
-              <Text style={[styles.startButtonText, { color: "#2563EB" }]}>
-                元旅行を見る
-              </Text>
+              <Text style={styles.startButtonText}>元旅行を見る</Text>
             </View>
           </TouchableOpacity>
         )}
