@@ -21,9 +21,13 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { COLORS } from "../constants/colors";
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { createTravel, createPoint, uploadPointImage } from '../services/travelService';
-
+import DateTimePicker from "@react-native-community/datetimepicker";
+import {
+  createTravel,
+  createPoint,
+  uploadPointImage,
+} from "../services/travelService";
+import { FONTS } from "../constants/fonts";
 
 const { width } = Dimensions.get("window");
 
@@ -235,7 +239,10 @@ export default function PostScreen() {
     // Validate image locations
     for (let i = 0; i < images.length; i++) {
       if (!imageLocations[i]) {
-        Alert.alert("入力エラー", `画像 ${i + 1} の位置情報を設定してください。`);
+        Alert.alert(
+          "入力エラー",
+          `画像 ${i + 1} の位置情報を設定してください。`
+        );
         return false;
       }
     }
@@ -265,7 +272,11 @@ export default function PostScreen() {
         }
 
         // 2. Create point
-        const pointId = await createPoint(location.latitude, location.longitude, imagePath);
+        const pointId = await createPoint(
+          location.latitude,
+          location.longitude,
+          imagePath
+        );
         if (!pointId) {
           throw new Error(`地点 ${i + 1} の作成に失敗しました。`);
         }
@@ -312,7 +323,7 @@ export default function PostScreen() {
           >
             <Feather name="arrow-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>投稿</Text>
+          <Text style={styles.headerTitle}>ルートの投稿</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -372,7 +383,9 @@ export default function PostScreen() {
                     style={styles.dateButton}
                     onPress={() => setShowStartPicker(true)}
                   >
-                    <Text style={styles.dateText}>{startDate.toLocaleDateString()}</Text>
+                    <Text style={styles.dateText}>
+                      {startDate.toLocaleDateString()}
+                    </Text>
                   </TouchableOpacity>
                   {showStartPicker && (
                     <DateTimePicker
@@ -395,7 +408,9 @@ export default function PostScreen() {
                     style={styles.dateButton}
                     onPress={() => setShowEndPicker(true)}
                   >
-                    <Text style={styles.dateText}>{endDate.toLocaleDateString()}</Text>
+                    <Text style={styles.dateText}>
+                      {endDate.toLocaleDateString()}
+                    </Text>
                   </TouchableOpacity>
                   {showEndPicker && (
                     <DateTimePicker
@@ -419,7 +434,7 @@ export default function PostScreen() {
                 style={styles.imagePickerButton}
                 onPress={handlePickImages}
               >
-                <Feather name="image" size={24} color="#2563EB" />
+                <Feather name="image" size={24} color="#03FFD1" />
                 <Text style={styles.imagePickerText}>画像を選択</Text>
               </TouchableOpacity>
 
@@ -459,22 +474,22 @@ export default function PostScreen() {
                             name="map-pin"
                             size={14}
                             color={
-                              imageLocations[index] ? "#10B981" : "#6B7280"
+                              imageLocations[index] ? "#10B981" : "#E5E7EB"
                             }
                           />
                           <Text
                             style={[
                               styles.locationButtonText,
                               imageLocations[index] &&
-                              styles.locationButtonTextActive,
+                                styles.locationButtonTextActive,
                             ]}
                           >
                             {imageLocations[index]
                               ? `${imageLocations[index].latitude.toFixed(
-                                4
-                              )}, ${imageLocations[index].longitude.toFixed(
-                                4
-                              )}`
+                                  4
+                                )}, ${imageLocations[index].longitude.toFixed(
+                                  4
+                                )}`
                               : "位置を選択"}
                           </Text>
                         </TouchableOpacity>
@@ -503,7 +518,7 @@ export default function PostScreen() {
               disabled={isSubmitting}
             >
               <LinearGradient
-                colors={["#2563EB", "#1D4ED8"]}
+                colors={["#03FFD1", "#03FFD1"]}
                 style={styles.submitButtonGradient}
               >
                 <Text style={styles.submitButtonText}>
@@ -537,7 +552,7 @@ export default function PostScreen() {
             >
               <Feather name="x" size={24} color="#1F2937" />
             </TouchableOpacity>
-            <Text style={{ fontSize: 16, fontWeight: "600" }}>位置を選択</Text>
+            <Text style={styles.selectLocationText}>位置を選択</Text>
             <TouchableOpacity
               onPress={saveImageLocation}
               style={{ padding: 8 }}
@@ -583,17 +598,17 @@ export default function PostScreen() {
             region={
               tempCoord
                 ? {
-                  latitude: tempCoord.latitude,
-                  longitude: tempCoord.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }
+                    latitude: tempCoord.latitude,
+                    longitude: tempCoord.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
                 : {
-                  latitude: 35.6762,
-                  longitude: 139.6503,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                }
+                    latitude: 35.6762,
+                    longitude: 139.6503,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }
             }
             onPress={(e) => setTempCoord(e.nativeEvent.coordinate)}
           >
@@ -626,7 +641,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+    textAlign: "center",
   },
   headerSpacer: {
     width: 40,
@@ -639,8 +658,6 @@ const styles = StyleSheet.create({
   },
   formSection: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
   },
   label: {
     fontSize: 14,
@@ -683,7 +700,7 @@ const styles = StyleSheet.create({
   },
   imagePickerText: {
     fontSize: 16,
-    color: "#2563EB",
+    color: "#03FFD1",
     fontWeight: "600",
   },
   imageCardsContainer: {
@@ -693,7 +710,7 @@ const styles = StyleSheet.create({
   imageCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#192130",
     borderRadius: 12,
     padding: 16,
   },
@@ -701,7 +718,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#2563EB",
+    backgroundColor: "#03FFD1",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -709,23 +726,29 @@ const styles = StyleSheet.create({
   spotNumberText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#000",
+    fontFamily: FONTS.ORBITRON_BOLD,
   },
   spotInfo: {
     flex: 1,
     marginRight: 12,
   },
   spotNameInput: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#374151",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
+    color: "#E5E7EB",
     borderWidth: 1,
     borderColor: "#E5E7EB",
     marginBottom: 8,
+  },
+  selectLocationText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#E5E7EB",
   },
   locationButton: {
     flexDirection: "row",
@@ -734,10 +757,11 @@ const styles = StyleSheet.create({
   },
   locationButtonText: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#E5E7EB",
+    fontWeight: "600",
   },
   locationButtonTextActive: {
-    color: "#10B981",
+    color: "#E5E7EB",
     fontWeight: "500",
   },
   spotImageContainer: {
@@ -783,7 +807,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#000",
   },
   searchContainer: {
     paddingHorizontal: 12,
@@ -812,8 +836,8 @@ const styles = StyleSheet.create({
     color: "#374151",
   },
   dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    alignItems: "flex-end",
     gap: 12,
   },
   dateField: {
@@ -821,20 +845,20 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: "#9CA3AF",
     marginBottom: 4,
   },
   dateButton: {
-    backgroundColor: '#374151',
+    backgroundColor: "#374151",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderWidth: 1,
-    borderColor: '#4B5563',
-    alignItems: 'center',
+    borderColor: "#4B5563",
+    alignItems: "center",
   },
   dateText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
   },
   dateArrow: {
