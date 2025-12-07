@@ -10,19 +10,25 @@ interface Particle {
   radius: number;
 }
 
-const PARTICLE_COUNT = 80;
+const PARTICLE_COUNT = 40;
 const PARTICLE_RADIUS = 2;
-const CONNECTION_DISTANCE = 150;
+const CONNECTION_DISTANCE = 120;
 const PARTICLE_COLOR = "#03FFD1";
 const LINE_COLOR = "#03FFD1";
 const LINE_OPACITY = 0.3;
+const TARGET_FPS = 30;
+const CONNECTION_UPDATE_INTERVAL = 3;
 
 export const ParticlesBackground: React.FC = () => {
   const { width, height } = useWindowDimensions();
   const [particles, setParticles] = useState<Particle[]>([]);
   const particlesRef = useRef<Particle[]>([]);
+  const connectionsRef = useRef<
+    Array<{ i: number; j: number; opacity: number }>
+  >([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastUpdateTimeRef = useRef<number>(0);
+  const frameCountRef = useRef<number>(0);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -39,17 +45,19 @@ export const ParticlesBackground: React.FC = () => {
         };
       });
       particlesRef.current = initialParticles;
+      connectionsRef.current = [];
       setParticles(initialParticles);
       initializedRef.current = true;
     }
 
     const animate = (currentTime: number) => {
       const deltaTime = currentTime - lastUpdateTimeRef.current;
-      const targetFPS = 60;
-      const frameInterval = 1000 / targetFPS;
+      const frameInterval = 1000 / TARGET_FPS;
 
       if (deltaTime >= frameInterval) {
-        particlesRef.current = particlesRef.current.map((particle) => {
+        const particles = particlesRef.current;
+        for (let i = 0; i < particles.length; i++) {
+          const particle = particles[i];
           let newX = particle.x + particle.vx;
           let newY = particle.y + particle.vy;
           let newVx = particle.vx;
@@ -64,16 +72,43 @@ export const ParticlesBackground: React.FC = () => {
             newY = Math.max(0, Math.min(height, newY));
           }
 
-          return {
+          particles[i] = {
             ...particle,
             x: newX,
             y: newY,
             vx: newVx,
             vy: newVy,
           };
-        });
+        }
 
-        setParticles([...particlesRef.current]);
+        frameCountRef.current++;
+        if (frameCountRef.current >= CONNECTION_UPDATE_INTERVAL) {
+          frameCountRef.current = 0;
+          const connections: Array<{ i: number; j: number; opacity: number }> =
+            [];
+          const connectionDistanceSquared =
+            CONNECTION_DISTANCE * CONNECTION_DISTANCE;
+
+          for (let i = 0; i < particles.length; i++) {
+            const p1 = particles[i];
+            for (let j = i + 1; j < particles.length; j++) {
+              const p2 = particles[j];
+              const dx = p2.x - p1.x;
+              const dy = p2.y - p1.y;
+              const distanceSquared = dx * dx + dy * dy;
+
+              if (distanceSquared < connectionDistanceSquared) {
+                const distance = Math.sqrt(distanceSquared);
+                const opacity =
+                  LINE_OPACITY * (1 - distance / CONNECTION_DISTANCE);
+                connections.push({ i, j, opacity });
+              }
+            }
+          }
+          connectionsRef.current = connections;
+        }
+
+        setParticles([...particles]);
         lastUpdateTimeRef.current = currentTime;
       }
 
@@ -90,20 +125,11 @@ export const ParticlesBackground: React.FC = () => {
     };
   }, [width, height]);
 
-  const getDistanceSquared = (
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-  ): number => {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    return dx * dx + dy * dy;
-  };
-
   if (width === 0 || height === 0 || particles.length === 0) {
     return null;
   }
+
+  const connections = connectionsRef.current;
 
   return (
     <Svg
@@ -114,7 +140,7 @@ export const ParticlesBackground: React.FC = () => {
     >
       {particles.map((particle, index) => (
         <Circle
-          key={index}
+          key={`p-${index}`}
           cx={particle.x}
           cy={particle.y}
           r={particle.radius}
@@ -123,35 +149,22 @@ export const ParticlesBackground: React.FC = () => {
         />
       ))}
 
-      {particles.map((particle1, i) => {
-        return particles.slice(i + 1).map((particle2, j) => {
-          const distanceSquared = getDistanceSquared(
-            particle1.x,
-            particle1.y,
-            particle2.x,
-            particle2.y
-          );
-          const connectionDistanceSquared =
-            CONNECTION_DISTANCE * CONNECTION_DISTANCE;
-
-          if (distanceSquared < connectionDistanceSquared) {
-            const distance = Math.sqrt(distanceSquared);
-            const opacity = LINE_OPACITY * (1 - distance / CONNECTION_DISTANCE);
-            return (
-              <Line
-                key={`${i}-${j}`}
-                x1={particle1.x}
-                y1={particle1.y}
-                x2={particle2.x}
-                y2={particle2.y}
-                stroke={LINE_COLOR}
-                strokeWidth={1}
-                opacity={opacity}
-              />
-            );
-          }
-          return null;
-        });
+      {connections.map((conn, idx) => {
+        const p1 = particles[conn.i];
+        const p2 = particles[conn.j];
+        if (!p1 || !p2) return null;
+        return (
+          <Line
+            key={`l-${conn.i}-${conn.j}-${idx}`}
+            x1={p1.x}
+            y1={p1.y}
+            x2={p2.x}
+            y2={p2.y}
+            stroke={LINE_COLOR}
+            strokeWidth={1}
+            opacity={conn.opacity}
+          />
+        );
       })}
     </Svg>
   );
