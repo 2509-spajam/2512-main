@@ -1,4 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import {
   View,
   Text,
@@ -6,6 +12,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Feather } from "@expo/vector-icons";
@@ -32,6 +39,16 @@ export function MapViewComponent({
   onShowResult,
 }: MapViewProps) {
   const [selectedSpotId, setSelectedSpotId] = useState<string | null>(null);
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTracksViewChanges(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const isAllCompleted = route.spots.every((spot) =>
     completedSpots.some((completed) => completed.spotId === spot.id)
@@ -69,6 +86,19 @@ export function MapViewComponent({
     };
   }, [route.spots]);
 
+  const handleResetMap = useCallback(() => {
+    setIsResetting(true);
+    setSelectedSpotId(null);
+    setTracksViewChanges(true);
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(initialRegion, 500);
+    }
+    setTimeout(() => {
+      setTracksViewChanges(false);
+      setIsResetting(false);
+    }, 1000);
+  }, [initialRegion]);
+
   const getCompletedSpot = (spotId: string): CompletedSpot | undefined => {
     return completedSpots.find((spot) => spot.spotId === spotId);
   };
@@ -81,6 +111,20 @@ export function MapViewComponent({
     if (rate >= 60) return "#D97706"; // Dark Orange
     return "#4B5563"; // Gray
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleResetMap();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [handleResetMap]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleResetMap();
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [completedSpots, handleResetMap]);
 
   return (
     <View style={styles.container}>
@@ -149,6 +193,7 @@ export function MapViewComponent({
 
       {/* マップ */}
       <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={initialRegion}
@@ -170,7 +215,7 @@ export function MapViewComponent({
               zIndex={zIndex}
               opacity={0.99}
               anchor={{ x: 0.5, y: 1 }}
-              tracksViewChanges={isSelected}
+              tracksViewChanges={tracksViewChanges || isSelected}
               onPress={() => {
                 setSelectedSpotId(spot.id);
                 onSpotSelect(spot.id, index);
@@ -214,6 +259,32 @@ export function MapViewComponent({
           );
         })}
       </MapView>
+
+      {/* リセットボタン */}
+      <View style={styles.resetButtonContainer}>
+        <TouchableOpacity
+          style={styles.resetButton}
+          onPress={handleResetMap}
+          activeOpacity={0.8}
+          disabled={isResetting}
+        >
+          {isResetting ? (
+            <ActivityIndicator size="small" color="#03FFD1" />
+          ) : (
+            <Feather name="refresh-cw" size={20} color="#03FFD1" />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* ローディングオーバーレイ */}
+      {isResetting && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#03FFD1" />
+            <Text style={styles.loadingText}>マップをリセット中...</Text>
+          </View>
+        </View>
+      )}
 
       {/* リザルトボタン */}
       {isAllCompleted && (
@@ -276,16 +347,15 @@ const styles = StyleSheet.create({
   markerContainer: {
     alignItems: "center",
     justifyContent: "center",
-    width: 80,
-    height: 100,
-    paddingBottom: 25,
+    width: "100%",
+    height: "100%",
   },
   markerContainerSelected: {
     transform: [{ scale: 1.3 }],
   },
   markerPin: {
-    width: 40,
-    height: 40,
+    width: 25,
+    height: 25,
     borderRadius: 20,
     backgroundColor: "#03FFD1",
     justifyContent: "center",
@@ -300,7 +370,7 @@ const styles = StyleSheet.create({
   },
   markerNumber: {
     fontSize: 16,
-    color: "#FFFFFF",
+    color: "#000",
     fontFamily: FONTS.ORBITRON_BOLD,
   },
   syncRateBadge: {
@@ -417,6 +487,50 @@ const styles = StyleSheet.create({
   resultButtonText: {
     fontSize: 16,
     color: "#000000",
+    fontFamily: FONTS.ORBITRON_BOLD,
+    letterSpacing: 1,
+  },
+  // --- Reset Button ---
+  resetButtonContainer: {
+    position: "absolute",
+    top: 100,
+    right: 16,
+    zIndex: 1000,
+  },
+  resetButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#192130",
+    borderWidth: 1,
+    borderColor: "#03FFD1",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#03FFD1",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+  },
+  // --- Loading Overlay ---
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 2000,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 14,
+    color: "#03FFD1",
     fontFamily: FONTS.ORBITRON_BOLD,
     letterSpacing: 1,
   },
