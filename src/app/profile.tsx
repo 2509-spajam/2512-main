@@ -185,11 +185,11 @@ const TabButton = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   headerContainer: {
     backgroundColor: "#192130",

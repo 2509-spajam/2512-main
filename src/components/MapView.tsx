@@ -241,7 +241,7 @@ export function MapViewComponent({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   header: {
     flexDirection: "row",
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#313745",
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
     paddingTop: 44,
   },
   backButton: {

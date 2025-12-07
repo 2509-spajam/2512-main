@@ -46,16 +46,18 @@ function RootLayoutNav() {
 
   if (isLoading || !fontsLoaded) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: COLORS.BACKGROUND,
-        }}
-      >
-        <ActivityIndicator size="large" />
-      </View>
+      <ScreenWrapper>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "transparent",
+          }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      </ScreenWrapper>
     );
   }
 
@@ -69,6 +71,9 @@ function RootLayoutNav() {
           tabBarStyle: {
             backgroundColor: COLORS.BACKGROUND,
             borderTopWidth: 0,
+          },
+          sceneStyle: {
+            backgroundColor: "transparent",
           },
         }}
       >
@@ -166,9 +171,8 @@ function RootLayoutNav() {
             tabBarStyle: { display: "none" },
           }}
         />
-
       </Tabs>
-    </ScreenWrapper >
+    </ScreenWrapper>
   );
 }
 

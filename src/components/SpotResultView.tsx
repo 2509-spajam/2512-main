@@ -133,7 +133,7 @@ export function SpotResultView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   header: {
     borderBottomWidth: 1,

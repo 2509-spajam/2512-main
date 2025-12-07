@@ -66,7 +66,7 @@ export default function Result() {
 
   if (loading || isSaving) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "transparent" }}>
         <ActivityIndicator size="large" color="#03FFD1" />
         {isSaving && <Text style={{ marginTop: 10, color: '#666' }}>保存中...</Text>}
       </View>
