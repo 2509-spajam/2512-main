@@ -49,6 +49,22 @@ export const fetchTravels = async (type: 'all' | 'original' | 'sync' = 'all'): P
       throw travelError;
     }
 
+    // Fetch sync counts
+    const { data: syncData } = await supabase
+      .from('travels')
+      .select('origin_travel_id')
+      .not('origin_travel_id', 'is', null);
+
+    const syncCounts: Record<string, number> = {};
+    if (syncData) {
+      syncData.forEach((item: any) => {
+        const originId = item.origin_travel_id;
+        if (originId) {
+          syncCounts[originId] = (syncCounts[originId] || 0) + 1;
+        }
+      });
+    }
+
     if (!travels) return [];
 
     // 2. Fetch all points for efficiency (or could fetch per travel, but batch is better)
@@ -119,7 +135,7 @@ export const fetchTravels = async (type: 'all' | 'original' | 'sync' = 'all'): P
         coverImage: coverImage,
         spots: travelPoints,
         likes: 0, // Placeholder
-        syncAttempts: 0, // Placeholder
+        syncAttempts: syncCounts[travel.id] || 0,
         createdAt: travel.started_at,
         description: travel.description || '',
         totalDistance: '--- km', // Placeholder, calculation would need lat/lng math
@@ -153,6 +169,12 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
       console.error('Error fetching travel:', travelError);
       throw travelError;
     }
+    
+    // Fetch sync count for this specific travel
+    const { count: syncCount } = await supabase
+      .from('travels')
+      .select('*', { count: 'exact', head: true })
+      .eq('origin_travel_id', id);
 
     if (!travels || travels.length === 0) return null;
 
@@ -219,7 +241,7 @@ export const fetchTravelById = async (id: string): Promise<TravelRoute | null> =
       coverImage: coverImage,
       spots: travelPoints,
       likes: 0,
-      syncAttempts: 0,
+      syncAttempts: syncCount || 0,
       createdAt: travel.started_at,
       description: travel.description || '',
       totalDistance: '--- km',

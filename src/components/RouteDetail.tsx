@@ -103,17 +103,10 @@ export function RouteDetail({
 
           <View style={styles.statsCard}>
             <View style={styles.statItem}>
-              <Feather name="map" size={20} color="#03FFD1" />
+              <Feather name="users" size={20} color="#03FFD1" />
               <View style={styles.statContent}>
-                <Text style={styles.statLabel}>距離</Text>
-                <Text style={styles.statValue}>{route.totalDistance}</Text>
-              </View>
-            </View>
-            <View style={styles.statItem}>
-              <Feather name="clock" size={20} color="#03FFD1" />
-              <View style={styles.statContent}>
-                <Text style={styles.statLabel}>所要時間</Text>
-                <Text style={styles.statValue}>{route.duration}</Text>
+                <Text style={styles.statLabel}>シンクロ数</Text>
+                <Text style={styles.statValue}>{route.syncAttempts} 回</Text>
               </View>
             </View>
             <View style={styles.statItem}>
