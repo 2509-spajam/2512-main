@@ -15,6 +15,7 @@ import {
   Platform,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
@@ -134,15 +135,35 @@ export default function PostScreen() {
     setImageNames(imageNames.filter((_, i) => i !== index));
   };
 
-  const openMapForImage = (index: number) => {
+  const getCurrentLocation = async (): Promise<{
+    latitude: number;
+    longitude: number;
+  } | null> => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        return null;
+      }
+      const loc = await Location.getCurrentPositionAsync({});
+      return { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+    } catch (e) {
+      console.warn("Location error:", e);
+      return null;
+    }
+  };
+
+  const openMapForImage = async (index: number) => {
     setMapTargetIndex(index);
-    // 初期位置は既存の位置、なければ中心座標
     const existing = imageLocations[index];
-    setTempCoord(
-      existing
-        ? { latitude: existing.latitude, longitude: existing.longitude }
-        : { latitude: 35.6762, longitude: 139.6503 }
-    );
+    if (existing) {
+      setTempCoord({
+        latitude: existing.latitude,
+        longitude: existing.longitude,
+      });
+    } else {
+      const current = await getCurrentLocation();
+      setTempCoord(current || { latitude: 35.6762, longitude: 139.6503 });
+    }
     setMapModalVisible(true);
   };
 
