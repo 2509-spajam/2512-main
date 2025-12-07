@@ -78,9 +78,7 @@ export function ResultView({
           <Feather name="arrow-left" size={24} color="#03FFD1" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>リザルト</Text>
-        <TouchableOpacity style={styles.shareButton}>
-          <Feather name="share-2" size={24} color="#03FFD1" />
-        </TouchableOpacity>
+        <Text></Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -88,9 +86,6 @@ export function ResultView({
           <View style={styles.trophyIcon}>
             <Feather name="award" size={48} color={result.color} />
           </View>
-          <Text style={styles.completionText}>シンクロ完了！</Text>
-          <Text style={styles.routeTitle}>{route.title}</Text>
-
           <View style={styles.scoreContainer}>
             <Text style={styles.scoreValue}>
               {animatedValue.toFixed(1)}
@@ -102,31 +97,6 @@ export function ResultView({
           </View>
 
           <Text style={styles.messageText}>{result.message}</Text>
-
-          <View style={styles.badgesContainer}>
-            {averageSyncRate >= 90 && (
-              <View style={styles.badge}>
-                <LinearGradient
-                  colors={["#FBBF24", "#F59E0B"]}
-                  style={styles.badgeIcon}
-                >
-                  <Feather name="star" size={32} color="#FFFFFF" />
-                </LinearGradient>
-                <Text style={styles.badgeLabel}>完璧主義者</Text>
-              </View>
-            )}
-            {completedSpots.length === route.spots.length && (
-              <View style={styles.badge}>
-                <LinearGradient
-                  colors={["#3B82F6", "#2563EB"]}
-                  style={styles.badgeIcon}
-                >
-                  <Feather name="map-pin" size={32} color="#FFFFFF" />
-                </LinearGradient>
-                <Text style={styles.badgeLabel}>全制覇</Text>
-              </View>
-            )}
-          </View>
         </View>
 
         <View style={styles.spotsSection}>
@@ -200,14 +170,18 @@ export function ResultView({
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.shareButtonLarge} activeOpacity={0.8}>
+          <TouchableOpacity
+            onPress={onBack}
+            style={styles.shareButtonLarge}
+            activeOpacity={0.8}
+          >
             <LinearGradient
               colors={["#03FFD1", "#03FFD1"]}
               style={styles.shareButtonGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.shareButtonText}>結果をシェアする</Text>
+              <Text style={styles.shareButtonText}>タイムラインに戻る</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -220,14 +194,6 @@ export function ResultView({
               <Text style={styles.backButtonText}>お手本を見る</Text>
             </TouchableOpacity>
           )}
-
-          <TouchableOpacity
-            style={styles.backButtonLarge}
-            onPress={onBack}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.backButtonText}>タイムラインに戻る</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -246,7 +212,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#313745",
     backgroundColor: "#192130",
   },
   backButton: {
@@ -265,7 +231,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scoreCard: {
-    backgroundColor: "#6B7280",
+    backgroundColor: "#374151",
     borderRadius: 24,
     padding: 32,
     margin: 16,
@@ -305,12 +271,19 @@ const styles = StyleSheet.create({
     color: "#03FFD1",
     fontVariant: ["tabular-nums"],
     fontFamily: FONTS.ORBITRON_BOLD,
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+    marginLeft: 16,
   },
   scoreUnit: {
     fontSize: 32,
     color: "#03FFD1",
     fontFamily: FONTS.ORBITRON_BOLD,
-    marginLeft: 4,
+    marginLeft: 12,
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   rankText: {
     fontSize: 48,

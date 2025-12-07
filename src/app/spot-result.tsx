@@ -105,18 +105,7 @@ export default function SpotResult() {
   }, [loading, route, completedSpot, router]);
 
   if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "transparent",
-        }}
-      >
-        <ActivityIndicator size="large" color="#03FFD1" />
-      </View>
-    );
+    return <></>;
   }
 
   if (!route || !completedSpot) {
