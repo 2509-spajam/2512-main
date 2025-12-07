@@ -338,14 +338,7 @@ export default function PostScreen() {
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Feather name="arrow-left" size={24} color="#03FFD1" />
-          </TouchableOpacity>
           <Text style={styles.headerTitle}>ルートの投稿</Text>
-          <View style={styles.headerSpacer} />
         </View>
 
         <KeyboardAvoidingView
@@ -649,12 +642,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#374151",
-    backgroundColor: "#192130",
   },
   backButton: {
     padding: 8,

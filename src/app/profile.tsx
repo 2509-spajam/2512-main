@@ -10,9 +10,11 @@ import {
   ImageSourcePropType,
   ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useAuth } from "../components/AuthContext";
 import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts";
 import { TravelRoute } from "../types";
 import { fetchTravels } from "../services/travelService";
 
@@ -48,8 +50,14 @@ const ProfileHeader = ({
   );
 };
 
-const RouteCard = ({ route }: { route: TravelRoute }) => (
-  <TouchableOpacity style={styles.card} activeOpacity={0.8}>
+const RouteCard = ({
+  route,
+  onPress,
+}: {
+  route: TravelRoute;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity style={styles.card} activeOpacity={0.8} onPress={onPress}>
     <View style={styles.imageContainer}>
       <Image
         source={{ uri: route.coverImage }}
@@ -57,7 +65,9 @@ const RouteCard = ({ route }: { route: TravelRoute }) => (
         resizeMode="cover"
       />
       <View style={styles.spotBadge}>
-        <Text style={styles.spotBadgeText}>{route.spots.length} スポット</Text>
+        <Text style={styles.spotBadgeText}>
+          {route.spots.length} check points
+        </Text>
       </View>
     </View>
 
@@ -78,14 +88,6 @@ const RouteCard = ({ route }: { route: TravelRoute }) => (
       </View>
 
       <View style={styles.statsContainer}>
-        <View style={styles.stats}>
-          <Feather name="heart" size={14} color="#6B7280" />
-          <Text style={styles.statText}>{route.likes}</Text>
-        </View>
-        <View style={styles.stats}>
-          <Feather name="users" size={14} color="#6B7280" />
-          <Text style={styles.statText}>{route.syncAttempts}</Text>
-        </View>
         <Text style={styles.distanceText}>
           {route.totalDistance} · {route.duration}
         </Text>
@@ -95,6 +97,7 @@ const RouteCard = ({ route }: { route: TravelRoute }) => (
 );
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<"root" | "sync">("root");
   const [routes, setRoutes] = useState<TravelRoute[]>([]);
@@ -114,6 +117,13 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRouteSelect = (route: TravelRoute) => {
+    router.push({
+      pathname: "/detail",
+      params: { routeId: route.id },
+    });
   };
 
   const myRoutes = routes.filter((route) => route.userId === user?.id);
@@ -142,13 +152,15 @@ export default function ProfileScreen() {
 
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#2563EB" />
+            <ActivityIndicator size="large" color="#03FFD1" />
           </View>
         ) : (
           <FlatList
             data={displayRoutes}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <RouteCard route={item} />}
+            renderItem={({ item }) => (
+              <RouteCard route={item} onPress={() => handleRouteSelect(item)} />
+            )}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
@@ -192,11 +204,9 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   headerContainer: {
-    backgroundColor: "#192130",
+    backgroundColor: "transparent",
     paddingTop: 10,
     paddingBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
   },
   headerTop: {
     flexDirection: "row",
@@ -208,7 +218,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   logoutButton: {
     paddingVertical: 8,
@@ -251,10 +264,10 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: "row",
-    backgroundColor: "#192130",
+    backgroundColor: "transparent",
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#374151",
   },
   tab: {
     flex: 1,
@@ -264,15 +277,15 @@ const styles = StyleSheet.create({
     borderBottomColor: "transparent",
   },
   tabActive: {
-    borderBottomColor: "#2563EB",
+    borderBottomColor: "#03FFD1",
   },
   tabText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#9CA3AF",
   },
   tabTextActive: {
-    color: "#2563EB",
+    color: "#03FFD1",
   },
   listContent: {
     padding: 16,
@@ -292,22 +305,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 40,
   },
+  stats: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  statText: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginLeft: 4,
+  },
   card: {
     width: "100%",
     marginBottom: 16,
     backgroundColor: "#192130",
     borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#313745",
   },
   imageContainer: {
     width: "100%",
     height: 180,
     position: "relative",
+    overflow: "hidden",
   },
   coverImage: {
     width: "100%",
@@ -316,16 +337,17 @@ const styles = StyleSheet.create({
   spotBadge: {
     position: "absolute",
     top: 12,
-    right: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    right: 36,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
   },
   spotBadgeText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#1F2937",
+    fontSize: 18,
+    fontFamily: FONTS.ORBITRON_BOLD,
+    color: "#03FFD1",
+    textShadowColor: "#03FFD1",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   cardContent: {
     padding: 16,
@@ -355,7 +377,7 @@ const styles = StyleSheet.create({
   },
   authorName: {
     fontSize: 13,
-    color: "#374151",
+    color: "#6B7280",
   },
   statsContainer: {
     flexDirection: "row",
@@ -363,17 +385,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-  },
-  stats: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  statText: {
-    fontSize: 13,
-    color: "#6B7280",
-    marginLeft: 4,
+    borderTopColor: "#313745",
   },
   distanceText: {
     fontSize: 11,
