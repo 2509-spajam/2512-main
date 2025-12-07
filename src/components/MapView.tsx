@@ -261,7 +261,7 @@ export function MapViewComponent({
       </MapView>
 
       {/* リセットボタン */}
-      <View style={styles.resetButtonContainer}>
+      {/* <View style={styles.resetButtonContainer}>
         <TouchableOpacity
           style={styles.resetButton}
           onPress={handleResetMap}
@@ -274,7 +274,7 @@ export function MapViewComponent({
             <Feather name="refresh-cw" size={20} color="#03FFD1" />
           )}
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* ローディングオーバーレイ */}
       {isResetting && (
