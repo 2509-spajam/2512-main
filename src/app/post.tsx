@@ -321,7 +321,7 @@ export default function PostScreen() {
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Feather name="arrow-left" size={24} color="#FFFFFF" />
+            <Feather name="arrow-left" size={24} color="#03FFD1" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>ルートの投稿</Text>
           <View style={styles.headerSpacer} />
