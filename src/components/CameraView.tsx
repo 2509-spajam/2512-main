@@ -12,9 +12,11 @@ import {
   CameraView as ExpoCameraView,
   useCameraPermissions,
 } from "expo-camera";
+import * as Location from "expo-location";
 import { Feather, Entypo } from "@expo/vector-icons";
 import { TravelRoute } from "../types";
 import { LinearGradient } from "expo-linear-gradient";
+import { calculateDistance } from "../utils/location";
 
 interface CameraViewProps {
   route: TravelRoute;
@@ -34,7 +36,7 @@ export function CameraView({
 }: CameraViewProps) {
   const [opacity, setOpacity] = useState(0.5);
   const [showGuide, setShowGuide] = useState(true);
-  const [distance] = useState(120);
+  const [distance, setDistance] = useState<number | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<ExpoCameraView>(null);
   const currentSpot = route.spots[currentSpotIndex];
@@ -51,6 +53,40 @@ export function CameraView({
       requestPermission();
     }
   }, [permission, requestPermission]);
+
+  useEffect(() => {
+    const updateDistance = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setDistance(null);
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        const currentLat = location.coords.latitude;
+        const currentLng = location.coords.longitude;
+        const calculatedDistance = calculateDistance(
+          currentLat,
+          currentLng,
+          currentSpot.lat,
+          currentSpot.lng
+        );
+        setDistance(Math.round(calculatedDistance));
+      } catch (error) {
+        console.error("Error getting location:", error);
+        setDistance(null);
+      }
+    };
+
+    updateDistance();
+    const interval = setInterval(updateDistance, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentSpot]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -136,7 +172,9 @@ export function CameraView({
               <Text style={styles.spotName}>{currentSpot.name}</Text>
               <View style={styles.distanceBadge}>
                 <Feather name="navigation" size={14} color="#FFFFFF" />
-                <Text style={styles.distanceText}>{distance}m</Text>
+                <Text style={styles.distanceText}>
+                  {distance !== null ? `${distance}m` : "--m"}
+                </Text>
               </View>
             </View>
             <View style={styles.spotLocation}>
