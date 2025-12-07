@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   header: {
     paddingHorizontal: 16,
@@ -143,8 +143,6 @@ const styles = StyleSheet.create({
   tabContainer: {
     flexDirection: "row",
     padding: 10,
-    // backgroundColor: "#192130",
-    backgroundColor: COLORS.BACKGROUND,
     borderBottomWidth: 1,
     borderBottomColor: "#374151",
   },

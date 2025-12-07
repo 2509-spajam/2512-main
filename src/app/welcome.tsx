@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   title: {
     fontSize: 24,

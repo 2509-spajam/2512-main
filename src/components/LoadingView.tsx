@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     padding: 20,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   progressBarContainer: {
     width: "100%",

@@ -79,7 +79,6 @@ export function Timeline({ routes, onRouteSelect }: TimelineProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   subtitle: {
     fontSize: 14,

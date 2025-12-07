@@ -66,7 +66,7 @@ export default function Map() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: "transparent" }}>
         <ActivityIndicator size="large" color="#03FFD1" />
       </View>
     );

@@ -23,13 +23,17 @@ interface RouteDetailProps {
 
 const { width } = Dimensions.get("window");
 
-export function RouteDetail({ route, onBack, onStartSync, onShowOriginal }: RouteDetailProps) {
+export function RouteDetail({
+  route,
+  onBack,
+  onStartSync,
+  onShowOriginal,
+}: RouteDetailProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const images = Array.from(new Set([
-    route.coverImage,
-    ...route.spots.map((spot) => spot.imageUrl),
-  ])).filter(Boolean);
+  const images = Array.from(
+    new Set([route.coverImage, ...route.spots.map((spot) => spot.imageUrl)])
+  ).filter(Boolean);
 
   const totalImages = images.length;
 
@@ -97,7 +101,7 @@ export function RouteDetail({ route, onBack, onStartSync, onShowOriginal }: Rout
         <View style={styles.infoSection}>
           <Text style={styles.description}>{route.description}</Text>
 
-          <View style={styles.statsGrid}>
+          <View style={styles.statsCard}>
             <View style={styles.statItem}>
               <Feather name="map" size={20} color="#03FFD1" />
               <View style={styles.statContent}>
@@ -151,12 +155,22 @@ export function RouteDetail({ route, onBack, onStartSync, onShowOriginal }: Rout
       <View style={styles.footer}>
         {route.originTravelId && (
           <TouchableOpacity
-            style={[styles.startButton, { marginBottom: 12, backgroundColor: '#fff', borderWidth: 1, borderColor: '#2563EB' }]}
+            style={[
+              styles.startButton,
+              {
+                marginBottom: 12,
+                backgroundColor: "#fff",
+                borderWidth: 1,
+                borderColor: "#2563EB",
+              },
+            ]}
             onPress={onShowOriginal}
             activeOpacity={0.8}
           >
             <View style={styles.startButtonGradient}>
-              <Text style={[styles.startButtonText, { color: '#2563EB' }]}>元旅行を見る</Text>
+              <Text style={[styles.startButtonText, { color: "#2563EB" }]}>
+                元旅行を見る
+              </Text>
             </View>
           </TouchableOpacity>
         )}
@@ -182,14 +196,14 @@ export function RouteDetail({ route, onBack, onStartSync, onShowOriginal }: Rout
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   backButton: {
     padding: 8,
@@ -281,10 +295,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 24,
   },
-  statsGrid: {
+  statsCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 24,
+    backgroundColor: "#192130",
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
   },
   statItem: {
     flexDirection: "row",
@@ -377,7 +395,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 16,
-    backgroundColor: COLORS.BACKGROUND,
+    backgroundColor: "transparent",
   },
   startButton: {
     borderRadius: 12,

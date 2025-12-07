@@ -67,7 +67,8 @@ export default function SpotResult() {
       try {
         // Load Route
         const routeData = await fetchTravelById(routeId);
-        if (!routeData) { // Interpreting `!foundRoute` as `!routeData` after fetch
+        if (!routeData) {
+          // Interpreting `!foundRoute` as `!routeData` after fetch
           router.replace("/");
           return;
         }
@@ -105,7 +106,14 @@ export default function SpotResult() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.BACKGROUND }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "transparent",
+        }}
+      >
         <ActivityIndicator size="large" color="#03FFD1" />
       </View>
     );
